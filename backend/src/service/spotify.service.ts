@@ -1,28 +1,21 @@
 import {Request} from "express";
 import axios from "axios";
-
-const encodeFormData = (data: any) => {
-    return Object.keys(data)
-        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-        .join('&');
-}
+import {encodeFormData} from "./utils.service";
 
 export async function auth(req: Request) {
-    const code = req.query.code as string || null
-    const state = req.query.state || null
+    const code = req.query.code
+    const state = req.query.state
 
     // TODO: Check body params in a better way
-    if(!code) {
-        console.error('no code')
+    if(
+        typeof code !== 'string' ||
+        typeof  state !== 'string'
+    ) {
+        console.error('No code, state or wrong type during authentication.')
         return
     }
 
-    if(state === null) {
-        console.error('no state')
-        return
-    }
-
-    const authString = 'Basic ' + Buffer.from('2ca454e3515b49328830ec5a9b2fd8b6' + ':' + '3eab9097ffea4a1a8a934308fef60137').toString('base64')
+    const authString = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')
 
     const parsedFormData = encodeFormData({
         code,

@@ -7,3 +7,9 @@ export function randomString(length: number) {
     }
     return result;
 }
+
+export function encodeFormData(data: any) {
+    return Object.keys(data)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+        .join('&');
+}

@@ -3,11 +3,6 @@ import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
 import {getUserData} from "./spotify.service";
 import {randomString} from "./utils.service";
 
-interface Room {
-    id: string
-    ownerSpotifyId: any
-    users: any[]
-}
 
 const roomsCache = new NodeCache({
     // stdTTL: 3600
@@ -24,44 +19,59 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
         return user.roomId
     }
 
-    let roomId = randomString(6)
-    // Get new id if room already exists
-    while(roomExists(roomId)) {
-        roomId = randomString(6)
-    }
+    let roomId = generateRoomId()
 
     if(user === null) {
-        // create new user
         await createUser({
             spotifyId: ownerId,
             accessToken: ownerData.access_token,
             refreshToken: ownerData.refresh_token,
             roomId
         })
-    } else if(roomExists(user.roomId)) {
+    } else {
         await updateUser({ spotifyId: ownerId, roomId })
     }
 
-    const roomData: Room = {
+    const room: Room = {
         id: roomId,
         ownerSpotifyId: ownerId,
         users: []
     }
 
-    roomsCache.set(roomId, roomData)
+    setRoom(room)
 
-    return roomId
+    return room.id
 }
 
 export function getRoom(roomId: string) {
     return roomsCache.get(roomId) as Room | undefined
 }
 
-export function setRoom(roomId: string, room: Room) {
-    roomsCache.set(roomId, room)
+export function setRoom(room: Room) {
+    roomsCache.set(room.id, room)
 }
 
 export function roomExists(roomId: string) {
     return roomsCache.has(roomId)
 }
 
+export function removeRoomUser(roomId: string, roomUser: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        return
+    }
+
+    room.users = room.users.filter(user => user.id !== roomUser)
+
+    setRoom(room)
+}
+
+function generateRoomId() {
+    let roomId = randomString(6)
+    // Get new id if room already exists
+    while(roomExists(roomId)) {
+        roomId = randomString(6)
+    }
+
+    return roomId
+}

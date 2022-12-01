@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/auth/spotify', roomAuth)
 router.get('/create', roomCreate)
-router.get('/join/:roomId', roomJoinGet)
+router.get('/join/:roomId?', roomJoinGet)
 router.post('/join/:roomId', roomJoinPost)
 router.get('/:roomId', room)
 
