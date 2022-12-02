@@ -6,6 +6,6 @@ const router = express.Router();
 router.get('/auth/spotify', getRoomAuth)
 router.get('/create', getRoomCreate)
 router.get('/join/:roomId?', roomJoinGet)
-router.post('/join/:roomId', roomJoinPost)
+router.post('/join/:roomId?', roomJoinPost)
 
 export default router
