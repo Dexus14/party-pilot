@@ -28,7 +28,7 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     }
 
     // Create or update user
-    user === null ? await updateUser(newUserData) : await createUser(newUserData)
+    user === null ? await createUser(newUserData) : await updateUser(newUserData)
 
     const room: Room = {
         id: roomId,

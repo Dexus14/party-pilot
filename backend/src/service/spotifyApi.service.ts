@@ -5,6 +5,7 @@ import {encodeFormData} from "./utils.service";
 export const SPOTFIY_SCOPES = 'user-read-private user-read-email'
 export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
 
+// FIMXE: IMPORTANT - REFRESH TOKEN SOMETIMES
 export async function authSpotify(req: Request) {
     const code = req.query.code
 
