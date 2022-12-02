@@ -5,8 +5,8 @@ export default function RoomUsers({ room }: { room: any }) {
             <ol>
                 { room.users.map((user: any) => {
                     return (
-                    <li>
-                        {user.name}
+                    <li style={{ color: user.currentlyActive ? 'green' : 'red' }}>
+                        {user.username}
                     </li>
                     )
                 }) }

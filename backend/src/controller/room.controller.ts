@@ -24,14 +24,16 @@ export async function roomJoinGet(req: express.Request, res: express.Response) {
 
 export async function roomJoinPost(req: express.Request, res: express.Response) {
     // Get request parameters
-    const {roomId, name} = req.body
-    if(!roomId || !name) {
+    const {roomId, username} = req.body
+    if(!roomId || !username) {
+        console.log('Missing parameters')
         return res.redirect('/room/join') // TODO: Show error
     }
 
     // Check room existance
     const roomExistance = roomExists(roomId)
-    if(!roomExistance || !name) {
+    if(!roomExistance) {
+        console.log('Room does not exist')
         return res.redirect('/room/join/' + roomId)
     }
 
@@ -43,7 +45,7 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
 
     // Do nothing if he already is in the room
     if(roomUserData === undefined || roomUserData.roomId !== roomId) {
-        const roomUser = createRoomUser(roomId, name)
+        const roomUser = createRoomUser(roomId, username)
         res.cookie('roomUser', roomUser)
     }
 

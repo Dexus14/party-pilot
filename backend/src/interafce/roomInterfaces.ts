@@ -1,7 +1,8 @@
 interface RoomUser {
     id: string
-    name: string
+    username: string
     roomId: string
+    currentlyActive: boolean
 }
 
 interface Room {

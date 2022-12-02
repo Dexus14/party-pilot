@@ -12,7 +12,7 @@ export async function authSpotify(req: Request) {
 
     const parsedFormData = encodeFormData({
         code,
-        redirect_uri: 'http://localhost:3002/room/create', // TODO: Change this to env variable before production
+        redirect_uri: process.env.SPOTIFY_AUTH_REDIRECT_URL,
         grant_type: 'authorization_code'
     })
 

@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getRoom, removeRoomUser} from "./rooms.service";
+import {getRoom, removeRoomUser, setRoomUserActive} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
 import {nextSong, previousSong} from "./spotifyApi.service";
 import {getUserBySpotifyId} from "./database.service";
@@ -24,6 +24,7 @@ export function createWebsocketListeners(io: Server<
 
         try {
             socketConnectToRoom(socket, roomId)
+            setRoomUserActive(roomId, userRoomId, true)
             socketRoomUpdate(io, roomId)
         } catch(e) {
             socket.to(socket.id).emit('noRoom')
@@ -68,6 +69,6 @@ async function eventSongNext(socket: Socket, roomId: string) {
 }
 
 function eventDisconnect(socket: Socket, roomId: string, userRoomId: string) {
-    removeRoomUser(roomId, userRoomId)
+    setRoomUserActive(roomId, userRoomId, false)
     socketRoomUpdate(socket, roomId)
 }

@@ -52,7 +52,7 @@ const io = new Server<
     SocketData
     >(8000, {
     cors: {
-        origin: ['http://localhost:' + process.env.APP_PORT], // TODO: Change this to production URL when deploying
+        origin: ['http://192.168.8.108:' + process.env.APP_PORT], // TODO: Change this to production URL when deploying
         credentials: true
     },
     cookie: true

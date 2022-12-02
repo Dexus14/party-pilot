@@ -6,7 +6,7 @@ import Unauthorized from "./components/Unauthorized/Unauthorized";
 import RoomUsers from "./components/RoomUsers/RoomUsers";
 
 
-const socket = io("http://localhost:8000", {
+const socket = io("ws://192.168.8.108:8000", {
     withCredentials: true
 })
 
@@ -14,13 +14,10 @@ function App() {
     const [cookies, setCookie, removeCookie] = useCookies(['roomUser'])
     const [isAuthorized, setIsAuthorized] = useState(true)
     // TODO: Remove his after tests
-    const [his, setHis] = useState<string[]>(['noone'])
     const [room, setRoom] = useState<any | null>(null)
 
     useEffect(() => {
         socket.on('roomUpdate', (room, xd) => setRoom(room))
-
-        socket.on('someoneHi', (username: string) => setHis((prev) => [...prev, username]))
 
         socket.on('connect_error', () => setIsAuthorized(false))
 
@@ -43,13 +40,11 @@ function App() {
             <p>In room: { cookies?.roomUser?.roomId ?? 'no' }</p>
 
             <button id={"btn-leave"} onClick={() => removeCookie('roomUser')}>I don't wanna be here anymore!</button>
-            <button type={"button"} id={"btn-hi"} onClick={() => socket.emit('sayHi')}>Say hi!</button>
+
+            <button onClick={() => socket.emit("songPrevious")}> {"<<<<"} </button>
+            <button onClick={() => socket.emit("songNext")}> {">>>>"} </button>
 
             { room && <RoomUsers room={room} /> }
-
-            <ol>
-                {his.map((h, i) => <li key={i}>{h}</li>)}
-            </ol>
         </div>
     );
 }
