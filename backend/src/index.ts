@@ -1,30 +1,28 @@
 import {Server} from "socket.io";
 import express from 'express'
 import cookieParser from "cookie-parser";
-import roomRoutes from "./routes/roomRoutes";
+import roomRoutes from "./routes/room.routes";
 import * as path from "path";
 import morgan from 'morgan'
-import {
-    ClientToServerEvents,
-    createWebsocketListeners,
-    InterServerEvents,
-    ServerToClientEvents,
-    SocketData
-} from "./service/websocket.service";
+import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./interafce/socketInterfaces";
+import {createWebsocketListeners} from "./service/websocket.service";
 require('dotenv').config()
+
+// EXPRESS server setup -------------------------------------------------------------------------------------------
 
 export const app = express()
 
 app.set('view engine', 'ejs');
-app.set('views', '/home/adaml/Documents/noldjs/partify/backend/src/views'); // TODO: Add concat with path
+app.set('views', path.join(__dirname, '../src/views'));
 app.use(cookieParser())
 app.use(express.urlencoded({
     extended: true
 }))
-// app.use(morgan('dev'))
+// Logging middleware
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
-app.listen(3002, () => {
-    console.log('listening')
+app.listen(process.env.APP_PORT, () => {
+    console.log('Started listening on port ' + process.env.APP_PORT)
 })
 
 app.get('/', (req, res) => {
@@ -33,18 +31,19 @@ app.get('/', (req, res) => {
 
 app.use('/room', roomRoutes)
 
+// Path for static files required by React app
 app.use(express.static(path.join(__dirname, '../../frontend/build')))
-// app.use(express.static(path.join(__dirname, '../../frontend/build')))
 
 app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
+// Unknown request handler
 app.use((req, res) => {
     res.send('404');
 });
 
-// SOCKET --------------------------------------------------------------------------------------------
+// WEBSOCKET server setup --------------------------------------------------------------------------------------------
 
 const io = new Server<
     ClientToServerEvents,
@@ -53,7 +52,7 @@ const io = new Server<
     SocketData
     >(8000, {
     cors: {
-        origin: ['http://localhost:3002'],
+        origin: ['http://localhost:' + process.env.APP_PORT], // TODO: Change this to production URL when deploying
         credentials: true
     },
     cookie: true

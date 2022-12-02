@@ -2,24 +2,17 @@ import {Request} from "express";
 import axios from "axios";
 import {encodeFormData} from "./utils.service";
 
-export async function auth(req: Request) {
-    const code = req.query.code
-    const state = req.query.state
+export const SPOTFIY_SCOPES = 'user-read-private user-read-email'
+export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
 
-    // TODO: Check body params in a better way
-    if(
-        typeof code !== 'string' ||
-        typeof  state !== 'string'
-    ) {
-        console.error('No code, state or wrong type during authentication.')
-        return
-    }
+export async function authSpotify(req: Request) {
+    const code = req.query.code
 
     const authString = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')
 
     const parsedFormData = encodeFormData({
         code,
-        redirect_uri: 'http://localhost:3002/room/create',
+        redirect_uri: 'http://localhost:3002/room/create', // TODO: Change this to env variable before production
         grant_type: 'authorization_code'
     })
 
@@ -38,9 +31,24 @@ export function getUserData(accessToken: string) {
     return makeGetRequest('https://api.spotify.com/v1/me', accessToken)
 }
 
+export function previousSong(accessToken: string) {
+    return makePostRequest('https://api.spotify.com/v1/me/player/previous', accessToken)
+}
+
+export function nextSong(accessToken: string) {
+    return makePostRequest('https://api.spotify.com/v1/me/player/next', accessToken)
+}
+
 function makeGetRequest(url: string, accessToken: string, params = {}) {
     return axios.get(url, {
         params,
+        headers: {
+            Authorization: 'Bearer ' + accessToken
+        }
+    })
+}
+function makePostRequest(url: string, accessToken: string) {
+    return axios.post(url, {}, {
         headers: {
             Authorization: 'Bearer ' + accessToken
         }

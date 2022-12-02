@@ -1,6 +1,6 @@
 import NodeCache from "node-cache";
 import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
-import {getUserData} from "./spotify.service";
+import {getUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
 
 
@@ -12,7 +12,6 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     const spotifyOwnerData = await getUserData(ownerData.access_token)
 
     const ownerId = spotifyOwnerData.data.id
-
     let user = await getUserBySpotifyId(ownerId)
 
     if(user !== null && roomExists(user.roomId)) {
@@ -21,16 +20,15 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
 
     let roomId = generateRoomId()
 
-    if(user === null) {
-        await createUser({
-            spotifyId: ownerId,
-            accessToken: ownerData.access_token,
-            refreshToken: ownerData.refresh_token,
-            roomId
-        })
-    } else {
-        await updateUser({ spotifyId: ownerId, roomId })
+    const newUserData = { // FIXME: Add static type from Prisma
+        spotifyId: ownerId,
+        roomId,
+        accessToken: ownerData.access_token,
+        refreshToken: ownerData.refresh_token,
     }
+
+    // Create or update user
+    user === null ? await updateUser(newUserData) : await createUser(newUserData)
 
     const room: Room = {
         id: roomId,
@@ -53,6 +51,39 @@ export function setRoom(room: Room) {
 
 export function roomExists(roomId: string) {
     return roomsCache.has(roomId)
+}
+
+export function roomAndUserExists(roomId: string, roomUserId: string) {
+    if(!roomExists(roomId)) {
+        return false
+    }
+
+    const room = getRoom(roomId) as Room
+
+    return room.users.some(user => user.id === roomUserId)
+}
+
+export function createRoomUser(roomId: string, userName: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('CreateUser: Room does not exist')
+    }
+
+    const roomUser: RoomUser = {
+        id: randomString(4),
+        name: userName,
+        roomId
+    }
+
+    // If by chance the id is already taken, generate a new one
+    while(room.users.find(user => user.id === roomUser.id)) {
+        roomUser.id = randomString(4)
+    }
+
+    room.users.push(roomUser)
+    setRoom(room)
+
+    return roomUser
 }
 
 export function removeRoomUser(roomId: string, roomUser: string) {
