@@ -52,6 +52,14 @@ export function resumeSong(accessToken: string) {
     return makePutRequest('https://api.spotify.com/v1/me/player/play', accessToken)
 }
 
+export function searchSong(accessToken: string, query: string) {
+    return makeGetRequest('https://api.spotify.com/v1/search', accessToken, {
+        q: query,
+        type: 'track',
+        limit: 3
+    })
+}
+
 function makeGetRequest(url: string, accessToken: string, params = {}) {
     return axios.get(url, {
         params,

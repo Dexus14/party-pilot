@@ -7,6 +7,7 @@ import morgan from 'morgan'
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./interafce/socketInterfaces";
 import {createWebsocketListeners} from "./service/websocket.service";
 import {updateRoomTracksIntervally} from "./service/rooms.service";
+import spotifyRoutes from "./routes/spotify.routes";
 require('dotenv').config()
 
 // EXPRESS server setup -------------------------------------------------------------------------------------------
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/room', roomRoutes)
+app.use('/api/spotify', spotifyRoutes)
 
 // Path for static files required by React app
 app.use(express.static(path.join(__dirname, '../../frontend/build')))

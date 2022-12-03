@@ -5,6 +5,7 @@ import {io} from "socket.io-client";
 import Unauthorized from "./components/Unauthorized/Unauthorized";
 import RoomUsers from "./components/RoomUsers/RoomUsers";
 import CurrentlyPlaying from "./components/CurrentlyPlaying/CurrentlyPlaying";
+import SongSearch from "./components/SongSearch/SongSearch";
 
 
 const socket = io("ws://192.168.8.108:8000", {
@@ -55,6 +56,7 @@ function App() {
 
             { room && <RoomUsers room={room} /> }
             { currentTrack && <CurrentlyPlaying track={currentTrack} /> }
+            <SongSearch />
         </div>
     );
 }
