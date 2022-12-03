@@ -1,5 +1,4 @@
 export default function RoomUsers({ room }: { room: any }) {
-    console.log(room)
     return (
         <div className={"room-users"}>
             <ol>

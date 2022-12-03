@@ -1,13 +1,12 @@
 import {Server, Socket} from "socket.io";
-import {getRoom, removeRoomUser, setRoomUserActive} from "./rooms.service";
+import {setRoomUserActive} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
-import {nextSong, previousSong} from "./spotifyApi.service";
-import {getUserBySpotifyId} from "./database.service";
+import {nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
     socketConnectToRoom,
     getRoomAndUserFromCookie,
     socketAuthMiddleware,
-    socketRoomUpdate
+    socketRoomUpdate, updateRoomTrack, getRoomOwnerToken
 } from "./websocketUtils.service";
 
 export function createWebsocketListeners(io: Server<
@@ -25,6 +24,7 @@ export function createWebsocketListeners(io: Server<
         try {
             socketConnectToRoom(socket, roomId)
             setRoomUserActive(roomId, userRoomId, true)
+            updateRoomTrack(roomId, socket)
             socketRoomUpdate(io, roomId)
         } catch(e) {
             socket.to(socket.id).emit('noRoom')
@@ -33,39 +33,49 @@ export function createWebsocketListeners(io: Server<
         // Event listeners
         socket.on('songPrevious', () => eventSongPrevious(socket, roomId))
         socket.on('songNext', () => eventSongNext(socket, roomId))
+        socket.on('songPause', () => eventSongPause(socket, roomId))
+        socket.on('songResume', () => eventSongResume(socket, roomId))
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })
 }
 
 async function eventSongPrevious(socket: Socket, roomId: string) {
-    const room = getRoom(roomId)
-    if (!room) {
-        return console.error('no room') // FIXME handle error
-    }
+    const accessToken = await getRoomOwnerToken(roomId)
 
-    const user = await getUserBySpotifyId(room.ownerSpotifyId)
-    if (!user) {
-        return console.error('no user') // FIXME handle error
-    }
     // TODO: Add trycatch
-    await previousSong(user.accessToken)
+    await previousSong(accessToken)
+    await updateRoomTrack(roomId, socket)
 }
 
 async function eventSongNext(socket: Socket, roomId: string) {
-    const room = getRoom(roomId)
-    if (!room) {
-        return console.error('no room') // FIXME handle error
-    }
-
-    const user = await getUserBySpotifyId(room.ownerSpotifyId)
-
-    if (!user) {
-        return console.error('no user') // FIXME handle error
-    }
+    const accessToken = await getRoomOwnerToken(roomId)
 
     // TODO: Add trycatch
-    await nextSong(user.accessToken)
+    await nextSong(accessToken)
+    await updateRoomTrack(roomId, socket)
+}
+
+async function eventSongPause(socket: Socket, roomId: string) {
+    const accessToken = await getRoomOwnerToken(roomId)
+
+    try {
+        await pauseSong(accessToken)
+        await updateRoomTrack(roomId, socket)
+    } catch(e) {
+        console.error('error pausing song', e)
+    }
+}
+
+async function eventSongResume(socket: Socket, roomId: string) {
+    const accessToken = await getRoomOwnerToken(roomId)
+
+    try {
+        await resumeSong(accessToken)
+        await updateRoomTrack(roomId, socket)
+    } catch(e) {
+        console.error('error resuming song', e)
+    }
 }
 
 function eventDisconnect(socket: Socket, roomId: string, userRoomId: string) {

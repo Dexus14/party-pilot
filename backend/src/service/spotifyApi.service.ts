@@ -2,7 +2,7 @@ import {Request} from "express";
 import axios from "axios";
 import {encodeFormData} from "./utils.service";
 
-export const SPOTFIY_SCOPES = 'user-read-private user-read-email'
+export const SPOTFIY_SCOPES = 'user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing'
 export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
 
 // FIMXE: IMPORTANT - REFRESH TOKEN SOMETIMES
@@ -32,12 +32,24 @@ export function getUserData(accessToken: string) {
     return makeGetRequest('https://api.spotify.com/v1/me', accessToken)
 }
 
+export function getPlaybackState(accessToken: string) {
+    return makeGetRequest('https://api.spotify.com/v1/me/player', accessToken)
+}
+
 export function previousSong(accessToken: string) {
     return makePostRequest('https://api.spotify.com/v1/me/player/previous', accessToken)
 }
 
 export function nextSong(accessToken: string) {
     return makePostRequest('https://api.spotify.com/v1/me/player/next', accessToken)
+}
+
+export function pauseSong(accessToken: string) {
+    return makePutRequest('https://api.spotify.com/v1/me/player/pause', accessToken)
+}
+
+export function resumeSong(accessToken: string) {
+    return makePutRequest('https://api.spotify.com/v1/me/player/play', accessToken)
 }
 
 function makeGetRequest(url: string, accessToken: string, params = {}) {
@@ -55,3 +67,12 @@ function makePostRequest(url: string, accessToken: string) {
         }
     })
 }
+
+function makePutRequest(url: string, accessToken: string) {
+    return axios.put(url, {}, {
+        headers: {
+            Authorization: 'Bearer ' + accessToken
+        }
+    })
+}
+

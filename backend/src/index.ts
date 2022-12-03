@@ -6,6 +6,7 @@ import * as path from "path";
 import morgan from 'morgan'
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./interafce/socketInterfaces";
 import {createWebsocketListeners} from "./service/websocket.service";
+import {updateRoomTracksIntervally} from "./service/rooms.service";
 require('dotenv').config()
 
 // EXPRESS server setup -------------------------------------------------------------------------------------------
@@ -45,7 +46,7 @@ app.use((req, res) => {
 
 // WEBSOCKET server setup --------------------------------------------------------------------------------------------
 
-const io = new Server<
+export const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
@@ -59,3 +60,4 @@ const io = new Server<
 })
 
 createWebsocketListeners(io)
+updateRoomTracksIntervally(io)

@@ -3,6 +3,8 @@ import {getRoom, roomAndUserExists, roomExists} from "./rooms.service";
 import cookieParser from "cookie-parser";
 import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
+import {getUserBySpotifyId} from "./database.service";
+import {getPlaybackState} from "./spotifyApi.service";
 
 export function socketConnectToRoom(socket: Socket, roomId: string) {
     const roomExistsance = roomExists(roomId ?? '')
@@ -43,4 +45,42 @@ export function socketAuthMiddleware(socket: Socket, next: (err?: ExtendedError|
     }
 
     next()
+}
+
+export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('updateRoomTrack: Room does not exist')
+    }
+
+    const user = await getUserBySpotifyId(room.ownerSpotifyId)
+    if(!user) {
+        throw new Error('updateRoomTrack: User does not exist')
+    }
+
+    const playbackState = await getPlaybackState(user.accessToken)
+    const { progress_ms, is_playing } = playbackState.data
+
+    const track = playbackState.data.item
+    const { artists, album, duration_ms, name } = track
+    const data = { name, is_playing, progress_ms, artists, album, duration_ms }
+
+    socket.to(roomId).emit('trackUpdate', data)
+    // Send data to the owner of the socket if one exists
+    socket instanceof Socket && socket.emit('trackUpdate', data)
+}
+
+export async function getRoomOwnerToken(roomId: string) {
+    const room = getRoom(roomId)
+    if (!room) {
+        throw new Error('no room') // FIXME handle error
+    }
+
+    const user = await getUserBySpotifyId(room.ownerSpotifyId)
+
+    if (!user) {
+        throw new Error('no user') // FIXME handle error
+    }
+
+    return user.accessToken
 }

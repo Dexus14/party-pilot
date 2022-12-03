@@ -1,12 +1,35 @@
 import NodeCache, {errorMonitor} from "node-cache";
 import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
-import {getUserData} from "./spotifyApi.service";
+import {getPlaybackState, getUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
+import {Server} from "socket.io";
+import {updateRoomTrack} from "./websocketUtils.service";
 
 
 const roomsCache = new NodeCache({
     // stdTTL: 3600
 })
+
+// TODO: Think about creating better way to keep the room updated
+const roomsToUpdate = new Set<string>()
+
+export function updateRoomTracksIntervally(io: Server) {
+    setInterval(async () => {
+        for(const roomId of roomsToUpdate) {
+            const roomExistance = roomExists(roomId)
+            if(!roomExistance) {
+                roomsToUpdate.delete(roomId)
+                continue
+            }
+
+            try {
+                await updateRoomTrack(roomId, io)
+            } catch (e) {
+                console.error('updateRoomTracksIntervally: ', e)
+            }
+        }
+    }, parseInt(process.env.TRACK_UPDATE_INTERVAL_MS ?? '5000'))
+}
 
 export async function createOrGetRoom(ownerData: any): Promise<string> {
     const spotifyOwnerData = await getUserData(ownerData.access_token)
@@ -37,6 +60,7 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     }
 
     setRoom(room)
+    roomsToUpdate.add(roomId) // TODO: Think about creating better way to keep the room updated
 
     return room.id
 }
