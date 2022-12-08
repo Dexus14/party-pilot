@@ -33,19 +33,19 @@ export function getSpotifyUserData(accessToken: string) {
 }
 
 export function getPlaybackState(accessToken: string) {
-    return makeGetRequest('/v1/me/player', accessToken)
+    return makeGetRequest('/me/player', accessToken)
 }
 
 export function previousSong(accessToken: string) {
-    return makePostRequest('/v1/me/player/previous', accessToken)
+    return makePostRequest('/me/player/previous', accessToken)
 }
 
 export function nextSong(accessToken: string) {
-    return makePostRequest('/v1/me/player/next', accessToken)
+    return makePostRequest('/me/player/next', accessToken)
 }
 
 export function pauseSong(accessToken: string) {
-    return makePutRequest('/v1/me/player/pause', accessToken)
+    return makePutRequest('/me/player/pause', accessToken)
 }
 
 export function resumeSong(accessToken: string) {
@@ -61,11 +61,11 @@ export function searchSong(accessToken: string, query: string) {
 }
 
 export function addSongToQueue(accessToken: string, songId: string) {
-    return makePostRequest('https://api.spotify.com/v1/me/player/queue', accessToken, {}, { uri: songId })
+    return makePostRequest('/me/player/queue', accessToken, {}, { uri: songId })
 }
 
 export function getQueue(accessToken: string) {
-    return makeGetRequest('https://api.spotify.com/v1/me/player/queue', accessToken)
+    return makeGetRequest('/me/player/queue', accessToken)
 }
 
 function makeGetRequest(gate: string, accessToken: string, params = {}) {
