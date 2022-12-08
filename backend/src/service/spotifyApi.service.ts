@@ -60,6 +60,14 @@ export function searchSong(accessToken: string, query: string) {
     })
 }
 
+export function addSongToQueue(accessToken: string, songId: string) {
+    return makePostRequest('https://api.spotify.com/v1/me/player/queue', accessToken, {}, { uri: songId })
+}
+
+export function getQueue(accessToken: string) {
+    return makeGetRequest('https://api.spotify.com/v1/me/player/queue', accessToken)
+}
+
 function makeGetRequest(url: string, accessToken: string, params = {}) {
     return axios.get(url, {
         params,
@@ -68,8 +76,9 @@ function makeGetRequest(url: string, accessToken: string, params = {}) {
         }
     })
 }
-function makePostRequest(url: string, accessToken: string) {
-    return axios.post(url, {}, {
+function makePostRequest(url: string, accessToken: string, body: any = {}, params: any = {}) {
+    return axios.post(url, body, {
+        params,
         headers: {
             Authorization: 'Bearer ' + accessToken
         }

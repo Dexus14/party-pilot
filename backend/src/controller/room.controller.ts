@@ -2,8 +2,9 @@ import {authSpotify} from "../service/spotifyApi.service";
 import {createOrGetRoom, createRoomUser, getRoom, removeRoomUser, roomExists, setRoom} from "../service/rooms.service";
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
+import {getRoomOwnerToken} from "../service/websocketUtils.service";
 
-export async function getRoomCreate(req: express.Request, res: express.Response) {
+export async function roomCreateGet(req: express.Request, res: express.Response) {
     const ownerData = await authSpotify(req)
 
     const roomId = await createOrGetRoom(ownerData)
@@ -11,7 +12,7 @@ export async function getRoomCreate(req: express.Request, res: express.Response)
     res.redirect(`/room/join/${roomId}`)
 }
 
-export async function getRoomAuth(req: express.Request, res: express.Response) {
+export async function roomAuthGet(req: express.Request, res: express.Response) {
     const url = getSpotifyAuthLink()
     res.redirect(url)
 }

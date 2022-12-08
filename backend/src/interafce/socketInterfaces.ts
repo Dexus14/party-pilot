@@ -2,6 +2,7 @@ export interface ServerToClientEvents {
     roomUpdate: (room: any) => void;
     noRoom: () => void;
     trackUpdate: (trackData: any) => void; // TODO: Add types here
+    roomQueueUpdate: (queue: any) => void; // TODO: Add types here
 }
 
 export interface ClientToServerEvents {
@@ -10,6 +11,7 @@ export interface ClientToServerEvents {
     songNext: () => void;
     songPause: () => void;
     songResume: () => void;
+    songAddToQueue: (songId: string) => void;
 }
 
 export interface InterServerEvents {

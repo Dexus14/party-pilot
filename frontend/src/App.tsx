@@ -6,6 +6,7 @@ import Unauthorized from "./components/Unauthorized/Unauthorized";
 import RoomUsers from "./components/RoomUsers/RoomUsers";
 import CurrentlyPlaying from "./components/CurrentlyPlaying/CurrentlyPlaying";
 import SongSearch from "./components/SongSearch/SongSearch";
+import SongQueue from "./components/SongQueue/SongQueue";
 
 
 const socket = io("ws://192.168.8.108:8000", {
@@ -17,6 +18,7 @@ function App() {
     const [isAuthorized, setIsAuthorized] = useState(true)
     // TODO: Remove his after tests
     const [room, setRoom] = useState<any | null>(null)
+    const [queue, setQueue] = useState<any | null>(null)
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
 
     useEffect(() => {
@@ -25,6 +27,8 @@ function App() {
         socket.on('connect_error', () => setIsAuthorized(false))
 
         socket.on('trackUpdate', (track) => setCurrentTrack(track))
+
+        socket.on('roomQueueUpdate', (queue) => setQueue(queue))
 
         return () => {
             socket.off('roomUpdate')
@@ -56,7 +60,8 @@ function App() {
 
             { room && <RoomUsers room={room} /> }
             { currentTrack && <CurrentlyPlaying track={currentTrack} /> }
-            <SongSearch />
+            { queue && <SongQueue queue={queue} />}
+            <SongSearch socket={socket} />
         </div>
     );
 }

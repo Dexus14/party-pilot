@@ -1,9 +1,10 @@
-import NodeCache, {errorMonitor} from "node-cache";
+import NodeCache from "node-cache";
 import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
-import {getPlaybackState, getUserData} from "./spotifyApi.service";
+import {addSongToQueue, getQueue, getUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
-import {Server} from "socket.io";
-import {updateRoomTrack} from "./websocketUtils.service";
+import {Server, Socket} from "socket.io";
+import {getRoomOwnerToken, updateRoomTrack} from "./websocketUtils.service";
+import express from "express";
 
 
 const roomsCache = new NodeCache({
@@ -97,7 +98,8 @@ export function createRoomUser(roomId: string, username: string) {
         id: randomString(4),
         username,
         roomId,
-        currentlyActive: false
+        currentlyActive: false,
+        songs: []
     }
 
     // If by chance the id is already taken, generate a new one
@@ -135,6 +137,60 @@ export function setRoomUserActive(roomId: string, roomUserId: string, active: bo
     })
 
     setRoom(room)
+}
+
+export function roomUserAddSong(roomId: string, roomUserId: string, songUri: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        return console.log('roomUserAddSong: Room does not exist')
+    }
+
+    const roomUsers = room.users
+    room.users = roomUsers.map(user => {
+        if (user.id === roomUserId) {
+            user.songs.push(songUri)
+        }
+        return user
+    })
+
+    setRoom(room)
+}
+
+export async function roomSongAdd(socket: Socket, roomId: string, userRoomId: string, songsongUri: string) {
+    const accessToken = await getRoomOwnerToken(roomId)
+    
+    try {
+        // TODO: Add better error here
+        // TODO: Check if song is already in queue
+        await addSongToQueue(accessToken, songsongUri)
+        roomUserAddSong(roomId, userRoomId, songsongUri)
+
+        const xd = await getQueueWithRoomUsers(roomId)
+        socket.emit('roomQueueUpdate', xd)
+        socket.to(roomId).emit('roomQueueUpdate', xd)
+    } catch(e) {
+        console.log(e)
+    }
+}
+
+export async function getQueueWithRoomUsers(roomId: string) {
+    const accessToken = await getRoomOwnerToken(roomId)
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error()
+    }
+    const response = await getQueue(accessToken)
+    const queue = response.data.queue
+
+    return queue.map((song: any) => {
+        const roomUsers = room.users.filter(user => user.songs.includes(song.uri))
+        const roomUserNames = roomUsers.map(user => user.username)
+        return {
+            name: song.name,
+            artists: song.artists,
+            users: roomUserNames
+        }
+    })
 }
 
 function generateRoomId() {

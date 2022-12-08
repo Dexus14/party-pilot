@@ -1,7 +1,8 @@
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {Socket} from "socket.io-client";
 
-export default function SongSearch() {
+export default function SongSearch({ socket }: { socket: Socket }) {
     const [search, setSearch] = useState('');
     const [results, setResults] = useState<any[]>([]);
     const [selected, setSelected] = useState<any | null>(null);
@@ -36,9 +37,9 @@ export default function SongSearch() {
             <ul>
                 {results.map((result) => (
                     <li
-                        key={result.id}
-                        onClick={() => setSelected(result)}
-                        className={selected?.id === result.id ? 'selected' : ''}
+                        key={result.uri}
+                        onClick={() => socket.emit('songAddToQueue', result.uri)}
+                        className={selected?.uri === result.uri ? 'selected' : ''}
                     >
                         <img src={result.albumImage} alt="album image"/>
                         {result.name} - {result.artists} ({result.album}) - {result.duration}

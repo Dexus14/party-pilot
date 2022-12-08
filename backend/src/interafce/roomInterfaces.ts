@@ -3,6 +3,7 @@ interface RoomUser {
     username: string
     roomId: string
     currentlyActive: boolean
+    songs: string[]
 }
 
 interface Room {

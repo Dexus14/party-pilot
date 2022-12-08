@@ -1,7 +1,7 @@
 import {Server, Socket} from "socket.io";
-import {setRoomUserActive} from "./rooms.service";
+import {getQueueWithRoomUsers, roomSongAdd, roomUserAddSong, setRoomUserActive} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
-import {nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
+import {addSongToQueue, nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
     socketConnectToRoom,
     getRoomAndUserFromCookie,
@@ -18,14 +18,15 @@ export function createWebsocketListeners(io: Server<
 
     io.use(socketAuthMiddleware)
 
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
         const {roomId, userRoomId} = getRoomAndUserFromCookie(socket.handshake.headers.cookie ?? '')
 
         try {
             socketConnectToRoom(socket, roomId)
             setRoomUserActive(roomId, userRoomId, true)
-            updateRoomTrack(roomId, socket)
-            socketRoomUpdate(io, roomId)
+            await updateRoomTrack(roomId, socket)
+            await socketRoomUpdate(io, roomId)
+            socket.emit('roomQueueUpdate', await getQueueWithRoomUsers(roomId))
         } catch(e) {
             socket.to(socket.id).emit('noRoom')
         }
@@ -35,6 +36,7 @@ export function createWebsocketListeners(io: Server<
         socket.on('songNext', () => eventSongNext(socket, roomId))
         socket.on('songPause', () => eventSongPause(socket, roomId))
         socket.on('songResume', () => eventSongResume(socket, roomId))
+        socket.on('songAddToQueue', (songId) => roomSongAdd(socket, roomId, userRoomId, songId)) // FIXME create function
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })

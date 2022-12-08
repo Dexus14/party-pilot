@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getRoom, roomAndUserExists, roomExists} from "./rooms.service";
+import {getQueueWithRoomUsers, getRoom, roomAndUserExists, roomExists} from "./rooms.service";
 import cookieParser from "cookie-parser";
 import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
@@ -16,7 +16,7 @@ export function socketConnectToRoom(socket: Socket, roomId: string) {
     socket.join(roomId)
 }
 
-export function socketRoomUpdate(socket: Server|Socket, roomId: string) {
+export async function socketRoomUpdate(socket: Server|Socket, roomId: string) {
     const room = getRoom(roomId)
     if(!room) {
         return console.error('no room') // FIXME handle error

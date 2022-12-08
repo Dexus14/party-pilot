@@ -17,7 +17,7 @@ export async function getSpotifySearchSong(req: express.Request, res: express.Re
     const response = await searchSong(accessToken, query)
     const formattedResponse = response.data.tracks.items.map((item: any) => {
         return {
-            id: item.id,
+            uri: item.uri,
             name: item.name,
             artists: item.artists.map((artist: any) => artist.name).join(', '),
             album: item.album.name,
