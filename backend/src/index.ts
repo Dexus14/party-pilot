@@ -10,6 +10,10 @@ import {updateRoomTracksIntervally} from "./service/rooms.service";
 import spotifyRoutes from "./routes/spotify.routes";
 require('dotenv').config()
 
+if(!process.env.APP_URL) {
+    throw new Error('APP_URL is not defined')
+}
+
 // EXPRESS server setup -------------------------------------------------------------------------------------------
 
 export const app = express()
@@ -55,7 +59,7 @@ export const io = new Server<
     SocketData
     >(8000, {
     cors: {
-        origin: ['http://192.168.8.108:' + process.env.APP_PORT], // TODO: Change this to production URL when deploying
+        origin: [process.env.APP_URL], // TODO: Change this to production URL when deploying
         credentials: true
     },
     cookie: true

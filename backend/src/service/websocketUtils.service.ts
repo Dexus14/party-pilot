@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getQueueWithRoomUsers, getRoom, roomAndUserExists, roomExists} from "./rooms.service";
+import {getRoom, roomAndUserExists, roomExists} from "./rooms.service";
 import cookieParser from "cookie-parser";
 import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
@@ -63,7 +63,7 @@ export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
 
     const track = playbackState.data.item
     const { artists, album, duration_ms, name } = track
-    const data = { name, is_playing, progress_ms, artists, album, duration_ms }
+    const data: RoomPlaybackStateData = { name, is_playing, progress_ms, artists, album, duration_ms }
 
     socket.to(roomId).emit('trackUpdate', data)
     // Send data to the owner of the socket if one exists

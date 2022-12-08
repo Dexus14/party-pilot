@@ -1,8 +1,7 @@
 import {authSpotify} from "../service/spotifyApi.service";
-import {createOrGetRoom, createRoomUser, getRoom, removeRoomUser, roomExists, setRoom} from "../service/rooms.service";
+import {createOrGetRoom, createRoomUser, removeRoomUser, roomExists} from "../service/rooms.service";
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
-import {getRoomOwnerToken} from "../service/websocketUtils.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
     const ownerData = await authSpotify(req)
@@ -24,18 +23,14 @@ export async function roomJoinGet(req: express.Request, res: express.Response) {
 }
 
 export async function roomJoinPost(req: express.Request, res: express.Response) {
-    // Get request parameters
     const {roomId, username} = req.body
     if(!roomId || !username) {
-        console.log('Missing parameters')
-        return res.redirect('/room/join') // TODO: Show error
+        return res.redirect('/room/join?error=missingParameters')
     }
 
-    // Check room existance
     const roomExistance = roomExists(roomId)
     if(!roomExistance) {
-        console.log('Room does not exist')
-        return res.redirect('/room/join/' + roomId)
+        return res.redirect('/room/join?error=roomDoesNotExist')
     }
 
     // If user is already in room, remove him from old room

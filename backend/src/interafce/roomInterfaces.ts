@@ -11,3 +11,13 @@ interface Room {
     ownerSpotifyId: string
     users: RoomUser[]
 }
+
+interface RoomPlaybackStateData {
+    name: string
+    is_playing: boolean
+    progress_ms: number
+    duration_ms: number
+
+    artists: any[]
+    album: any[]
+}

@@ -4,8 +4,9 @@ import {encodeFormData} from "./utils.service";
 
 export const SPOTFIY_SCOPES = 'user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing'
 export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
+const SPOTIFY_AUTH_API_TOKEN_URL = 'https://accounts.spotify.com/api/token'
+const SPOTIFY_API_URL = 'https://api.spotify.com/v1'
 
-// FIMXE: IMPORTANT - REFRESH TOKEN SOMETIMES
 export async function authSpotify(req: Request) {
     const code = req.query.code
 
@@ -17,8 +18,7 @@ export async function authSpotify(req: Request) {
         grant_type: 'authorization_code'
     })
 
-    // TODO: Handle error
-    const res = await axios.post('https://accounts.spotify.com/api/token', parsedFormData, {
+    const res = await axios.post(SPOTIFY_AUTH_API_TOKEN_URL, parsedFormData, {
         headers: {
             'Authorization': authString,
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -28,32 +28,32 @@ export async function authSpotify(req: Request) {
     return res.data
 }
 
-export function getUserData(accessToken: string) {
-    return makeGetRequest('https://api.spotify.com/v1/me', accessToken)
+export function getSpotifyUserData(accessToken: string) {
+    return makeGetRequest('/me', accessToken)
 }
 
 export function getPlaybackState(accessToken: string) {
-    return makeGetRequest('https://api.spotify.com/v1/me/player', accessToken)
+    return makeGetRequest('/v1/me/player', accessToken)
 }
 
 export function previousSong(accessToken: string) {
-    return makePostRequest('https://api.spotify.com/v1/me/player/previous', accessToken)
+    return makePostRequest('/v1/me/player/previous', accessToken)
 }
 
 export function nextSong(accessToken: string) {
-    return makePostRequest('https://api.spotify.com/v1/me/player/next', accessToken)
+    return makePostRequest('/v1/me/player/next', accessToken)
 }
 
 export function pauseSong(accessToken: string) {
-    return makePutRequest('https://api.spotify.com/v1/me/player/pause', accessToken)
+    return makePutRequest('/v1/me/player/pause', accessToken)
 }
 
 export function resumeSong(accessToken: string) {
-    return makePutRequest('https://api.spotify.com/v1/me/player/play', accessToken)
+    return makePutRequest('/me/player/play', accessToken)
 }
 
 export function searchSong(accessToken: string, query: string) {
-    return makeGetRequest('https://api.spotify.com/v1/search', accessToken, {
+    return makeGetRequest('/search', accessToken, {
         q: query,
         type: 'track',
         limit: 3
@@ -68,7 +68,8 @@ export function getQueue(accessToken: string) {
     return makeGetRequest('https://api.spotify.com/v1/me/player/queue', accessToken)
 }
 
-function makeGetRequest(url: string, accessToken: string, params = {}) {
+function makeGetRequest(gate: string, accessToken: string, params = {}) {
+    const url = SPOTIFY_API_URL + gate
     return axios.get(url, {
         params,
         headers: {
@@ -76,7 +77,8 @@ function makeGetRequest(url: string, accessToken: string, params = {}) {
         }
     })
 }
-function makePostRequest(url: string, accessToken: string, body: any = {}, params: any = {}) {
+function makePostRequest(gate: string, accessToken: string, body: any = {}, params: any = {}) {
+    const url = SPOTIFY_API_URL + gate
     return axios.post(url, body, {
         params,
         headers: {
@@ -85,7 +87,8 @@ function makePostRequest(url: string, accessToken: string, body: any = {}, param
     })
 }
 
-function makePutRequest(url: string, accessToken: string) {
+function makePutRequest(gate: string, accessToken: string) {
+    const url = SPOTIFY_API_URL + gate
     return axios.put(url, {}, {
         headers: {
             Authorization: 'Bearer ' + accessToken

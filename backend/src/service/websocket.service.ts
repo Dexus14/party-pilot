@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getQueueWithRoomUsers, roomSongAdd, roomUserAddSong, setRoomUserActive} from "./rooms.service";
+import {getQueueWithRoomUsers, roomUserAddSong, setRoomUserActive} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
 import {addSongToQueue, nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
@@ -36,7 +36,7 @@ export function createWebsocketListeners(io: Server<
         socket.on('songNext', () => eventSongNext(socket, roomId))
         socket.on('songPause', () => eventSongPause(socket, roomId))
         socket.on('songResume', () => eventSongResume(socket, roomId))
-        socket.on('songAddToQueue', (songId) => roomSongAdd(socket, roomId, userRoomId, songId)) // FIXME create function
+        socket.on('songAddToQueue', (songId) => eventSongAddToQueue(socket, roomId, userRoomId, songId))
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })
@@ -45,17 +45,23 @@ export function createWebsocketListeners(io: Server<
 async function eventSongPrevious(socket: Socket, roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
 
-    // TODO: Add trycatch
-    await previousSong(accessToken)
-    await updateRoomTrack(roomId, socket)
+    try {
+        await previousSong(accessToken)
+        await updateRoomTrack(roomId, socket)
+    } catch(e) {
+        console.error('eventSongPrevious: ', e)
+    }
 }
 
 async function eventSongNext(socket: Socket, roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
 
-    // TODO: Add trycatch
-    await nextSong(accessToken)
-    await updateRoomTrack(roomId, socket)
+    try {
+        await nextSong(accessToken)
+        await updateRoomTrack(roomId, socket)
+    } catch(e) {
+        console.error('eventSongNext: ', e)
+    }
 }
 
 async function eventSongPause(socket: Socket, roomId: string) {
@@ -65,7 +71,7 @@ async function eventSongPause(socket: Socket, roomId: string) {
         await pauseSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        console.error('error pausing song', e)
+        console.error('eventSongPause: ', e)
     }
 }
 
@@ -76,11 +82,26 @@ async function eventSongResume(socket: Socket, roomId: string) {
         await resumeSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        console.error('error resuming song', e)
+        console.error('eventSongResume: ', e)
     }
 }
 
-function eventDisconnect(socket: Socket, roomId: string, userRoomId: string) {
+async function eventSongAddToQueue(socket: Socket, roomId: string, userRoomId: string, songsongUri: string) {
+    const accessToken = await getRoomOwnerToken(roomId)
+
+    try {
+        await addSongToQueue(accessToken, songsongUri)
+        roomUserAddSong(roomId, userRoomId, songsongUri)
+
+        const queueWithUserData = await getQueueWithRoomUsers(roomId)
+        socket.emit('roomQueueUpdate', queueWithUserData)
+        socket.to(roomId).emit('roomQueueUpdate', queueWithUserData)
+    } catch(e) {
+        console.error('eventSongAddToQueue: ', e)
+    }
+}
+
+async function eventDisconnect(socket: Socket, roomId: string, userRoomId: string) {
     setRoomUserActive(roomId, userRoomId, false)
-    socketRoomUpdate(socket, roomId)
+    await socketRoomUpdate(socket, roomId)
 }

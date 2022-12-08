@@ -1,11 +1,10 @@
 import NodeCache from "node-cache";
 import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
-import {addSongToQueue, getQueue, getUserData} from "./spotifyApi.service";
+import {getQueue, getSpotifyUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
-import {Server, Socket} from "socket.io";
+import {Server} from "socket.io";
 import {getRoomOwnerToken, updateRoomTrack} from "./websocketUtils.service";
-import express from "express";
-
+import {Prisma} from '@prisma/client'
 
 const roomsCache = new NodeCache({
     // stdTTL: 3600
@@ -29,11 +28,11 @@ export function updateRoomTracksIntervally(io: Server) {
                 console.error('updateRoomTracksIntervally: ', e)
             }
         }
-    }, parseInt(process.env.TRACK_UPDATE_INTERVAL_MS ?? '5000'))
+    }, parseInt(process.env.TRACK_UPDATE_INTERVAL_MS as string))
 }
 
 export async function createOrGetRoom(ownerData: any): Promise<string> {
-    const spotifyOwnerData = await getUserData(ownerData.access_token)
+    const spotifyOwnerData = await getSpotifyUserData(ownerData.access_token)
 
     const ownerId = spotifyOwnerData.data.id
     let user = await getUserBySpotifyId(ownerId)
@@ -44,7 +43,7 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
 
     let roomId = generateRoomId()
 
-    const newUserData = { // FIXME: Add static type from Prisma
+    const newUserData: Prisma.UserCreateInput | Prisma.UserUpdateInput = {
         spotifyId: ownerId,
         roomId,
         accessToken: ownerData.access_token,
@@ -156,23 +155,6 @@ export function roomUserAddSong(roomId: string, roomUserId: string, songUri: str
     setRoom(room)
 }
 
-export async function roomSongAdd(socket: Socket, roomId: string, userRoomId: string, songsongUri: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-    
-    try {
-        // TODO: Add better error here
-        // TODO: Check if song is already in queue
-        await addSongToQueue(accessToken, songsongUri)
-        roomUserAddSong(roomId, userRoomId, songsongUri)
-
-        const xd = await getQueueWithRoomUsers(roomId)
-        socket.emit('roomQueueUpdate', xd)
-        socket.to(roomId).emit('roomQueueUpdate', xd)
-    } catch(e) {
-        console.log(e)
-    }
-}
-
 export async function getQueueWithRoomUsers(roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
     const room = getRoom(roomId)
@@ -187,7 +169,7 @@ export async function getQueueWithRoomUsers(roomId: string) {
         const roomUserNames = roomUsers.map(user => user.username)
         return {
             name: song.name,
-            artists: song.artists,
+            artists: song.artists, // TODO: Add image
             users: roomUserNames
         }
     })
