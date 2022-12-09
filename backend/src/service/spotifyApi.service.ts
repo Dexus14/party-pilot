@@ -1,6 +1,7 @@
 import {Request} from "express";
 import axios from "axios";
 import {encodeFormData} from "./utils.service";
+import {getSpotifyAuthString} from "./spotifyUtils.service";
 
 export const SPOTFIY_SCOPES = 'user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing'
 export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
@@ -23,6 +24,24 @@ export async function authSpotify(req: Request) {
             'Authorization': authString,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
+    })
+
+    return res.data
+}
+
+export async function refreshToken(refreshToken: string) {
+    const authString = getSpotifyAuthString()
+
+    const parsedFormData = encodeFormData({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+    })
+
+    const res = await axios.post(SPOTIFY_AUTH_API_TOKEN_URL, parsedFormData, {
+        headers: {
+            'Authorization': authString,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
     })
 
     return res.data

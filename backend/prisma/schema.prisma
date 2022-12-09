@@ -16,6 +16,7 @@ model User {
   spotifyId String @unique
   accessToken String
   refreshToken String
+  lastRefresh DateTime
 
   roomId String
 }

@@ -43,11 +43,12 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
 
     let roomId = generateRoomId()
 
-    const newUserData: Prisma.UserCreateInput | Prisma.UserUpdateInput = {
+    const newUserData: Prisma.UserCreateInput = {
         spotifyId: ownerId,
         roomId,
         accessToken: ownerData.access_token,
         refreshToken: ownerData.refresh_token,
+        lastRefresh: new Date()
     }
 
     // Create or update user
