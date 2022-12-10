@@ -41,8 +41,9 @@ app.use('/api/spotify', spotifyRoutes)
 // Path for static files required by React app
 app.use(express.static(path.join(__dirname, '../../frontend/build')))
 
-app.get('/app', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
+app.get('/app', async (req, res) => {
+    res.redirect(process.env.APP_URL ?? '')
+    // res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
 // Unknown request handler

@@ -42,9 +42,9 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
     // Do nothing if he already is in the room
     if(roomUserData === undefined || roomUserData.roomId !== roomId) {
         const roomUser = createRoomUser(roomId, username)
-        res.cookie('roomUser', roomUser, {
+        return res.cookie('roomUser', roomUser, {
             maxAge: 1000 * 60 * 60 * 24 // 1 day
-        })
+        }).redirect(process.env.APP_URL ?? '')
     }
 
     res.redirect('/app')

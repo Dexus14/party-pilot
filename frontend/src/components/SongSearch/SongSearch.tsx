@@ -11,11 +11,12 @@ export default function SongSearch({ socket }: { socket: Socket }) {
         const abortController = new AbortController();
 
         if (search.length > 2) { // TODO: Add delay between requests
-            axios.get('http://192.168.8.108:3002/api/spotify/search_song', {
+            axios.get('/api/spotify/search_song', {
                 params: {
                     q: search
                 },
-                signal: abortController.signal
+                signal: abortController.signal,
+                withCredentials: true
             }).then((res) => {
                 console.log(res.data)
                 setResults(res.data)
