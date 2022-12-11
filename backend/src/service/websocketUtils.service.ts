@@ -20,14 +20,13 @@ export function socketConnectToRoom(socket: Socket, roomId: string) {
 export async function socketRoomUpdate(socket: Server|Socket, roomId: string) {
     const room = getRoom(roomId)
     if(!room) {
-        return console.error('no room') // FIXME handle error
+        throw new Error('This room does not exist.')
     }
 
     socket.to(roomId).emit('roomUpdate', room)
 }
 
 export function getRoomAndUserFromCookie(cookieString: string) {
-    // FIXME: better way to handle this?
     const cookies = cookieParser.JSONCookies(cookie.parse(cookieString))
     // @ts-ignore
     const roomId = cookies?.roomUser?.roomId
@@ -51,7 +50,7 @@ export function socketAuthMiddleware(socket: Socket, next: (err?: ExtendedError|
 export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
     const room = getRoom(roomId)
     if(!room) {
-        throw new Error('updateRoomTrack: Room does not exist')
+        throw new Error('Room does not exist')
     }
 
     const accessToken = await getRoomOwnerToken(roomId)
@@ -71,14 +70,27 @@ export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
 export async function getRoomOwnerToken(roomId: string) {
     const room = getRoom(roomId)
     if (!room) {
-        throw new Error('no room') // FIXME handle error
+        throw new Error('getRoomOwnerToken: Room does not exist')
     }
 
     const user = await getUserBySpotifyId(room.ownerSpotifyId)
-
     if (!user) {
-        throw new Error('no user') // FIXME handle error
+        throw new Error('getRoomOwnerToken: User does not exist')
     }
 
     return await refreshTokenIfNeeded(user)
+}
+
+export function handleSocketError(socket: Socket|Server, error: any, serverError: boolean = false, fatal: boolean = false) {
+    const message = serverError || !(error instanceof Error) ? 'Unknown error' : error.message
+
+    console.error('Socket error: ', message)
+    if(socket instanceof Server) {
+        return
+    }
+
+    socket.emit('error', message)
+    if(fatal) {
+        socket.disconnect(true)
+    }
 }

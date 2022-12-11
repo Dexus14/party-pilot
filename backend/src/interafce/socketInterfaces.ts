@@ -3,10 +3,10 @@ export interface ServerToClientEvents {
     noRoom: () => void;
     trackUpdate: (trackData: any) => void; // TODO: Add types here
     roomQueueUpdate: (queue: any) => void; // TODO: Add types here
+    error: (message: string) => void;
 }
 
 export interface ClientToServerEvents {
-    sayHi: () => void;
     songPrevious: () => void;
     songNext: () => void;
     songPause: () => void;

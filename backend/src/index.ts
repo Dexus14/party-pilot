@@ -42,8 +42,9 @@ app.use('/api/spotify', spotifyRoutes)
 app.use(express.static(path.join(__dirname, '../../frontend/build')))
 
 app.get('/app', async (req, res) => {
-    res.redirect(process.env.APP_URL ?? '')
-    // res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
+    process.env.APP_ENV === 'dev' ?
+        res.redirect(process.env.APP_URL ?? '') :
+        res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
 // Unknown request handler
@@ -60,7 +61,7 @@ export const io = new Server<
     SocketData
     >(8000, {
     cors: {
-        origin: [process.env.APP_URL], // TODO: Change this to production URL when deploying
+        origin: [process.env.APP_URL],
         credentials: true
     },
     cookie: true

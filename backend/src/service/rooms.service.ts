@@ -6,11 +6,8 @@ import {Server} from "socket.io";
 import {getRoomOwnerToken, updateRoomTrack} from "./websocketUtils.service";
 import {Prisma} from '@prisma/client'
 
-const roomsCache = new NodeCache({
-    // stdTTL: 3600
-})
+const roomsCache = new NodeCache()
 
-// TODO: Think about creating better way to keep the room updated
 const roomsToUpdate = new Set<string>()
 
 export function updateRoomTracksIntervally(io: Server) {
@@ -61,7 +58,7 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     }
 
     setRoom(room)
-    roomsToUpdate.add(roomId) // TODO: Think about creating better way to keep the room updated
+    roomsToUpdate.add(roomId)
 
     return room.id
 }
@@ -91,7 +88,7 @@ export function roomAndUserExists(roomId: string, roomUserId: string) {
 export function createRoomUser(roomId: string, username: string) {
     const room = getRoom(roomId)
     if(!room) {
-        throw new Error('CreateUser: Room does not exist')
+        throw new Error('Room does not exist')
     }
 
     const roomUser: RoomUser = {
@@ -127,7 +124,7 @@ export function removeRoomUser(roomId: string, roomUserId: string) {
 export function setRoomUserActive(roomId: string, roomUserId: string, active: boolean) {
     const room = getRoom(roomId)
     if(!room) {
-        return console.log('setRoomUserActive: Room does not exist')
+        throw new Error('Room does not exist')
     }
 
     room.users.map(user => {
@@ -142,7 +139,7 @@ export function setRoomUserActive(roomId: string, roomUserId: string, active: bo
 export function roomUserAddSong(roomId: string, roomUserId: string, songUri: string) {
     const room = getRoom(roomId)
     if(!room) {
-        return console.log('roomUserAddSong: Room does not exist')
+        return console.log('Room does not exist')
     }
 
     const roomUsers = room.users
@@ -160,7 +157,7 @@ export async function getQueueWithRoomUsers(roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
     const room = getRoom(roomId)
     if(!room) {
-        throw new Error()
+        throw new Error('Room does not exist')
     }
     const response = await getQueue(accessToken)
     const queue = response.data.queue

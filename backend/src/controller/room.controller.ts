@@ -4,11 +4,15 @@ import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
-    const ownerData = await authSpotify(req)
+    try {
+        const ownerData = await authSpotify(req)
 
-    const roomId = await createOrGetRoom(ownerData)
+        const roomId = await createOrGetRoom(ownerData)
 
-    res.redirect(`/room/join/${roomId}`)
+        res.redirect(`/room/join/${roomId}`)
+    } catch (e) {
+        res.status(500).send('Error while creating room')
+    }
 }
 
 export async function roomAuthGet(req: express.Request, res: express.Response) {

@@ -30,6 +30,8 @@ function App() {
 
         socket.on('roomQueueUpdate', (queue) => setQueue(queue))
 
+        socket.on('error', console.log)
+
         return () => {
             socket.off('roomUpdate')
             socket.off('someoneHi')

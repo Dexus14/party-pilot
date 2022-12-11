@@ -1,11 +1,12 @@
 import express from "express";
 import {getRoomOwnerToken} from "../service/websocketUtils.service";
 import {searchSong} from "../service/spotifyApi.service";
+import {mapSongsData} from "../service/spotifyUtils.service";
 
 export async function getSpotifySearchSong(req: express.Request, res: express.Response) {
     const roomId = req.cookies.roomUser.roomId // TODO: Add proper auth
     if(!roomId) {
-        return res.status(403).send('No room id')
+        return res.status(403).send('You are not in a room')
     }
 
     const accessToken = await getRoomOwnerToken(roomId)
@@ -14,17 +15,12 @@ export async function getSpotifySearchSong(req: express.Request, res: express.Re
         return res.status(400).send('Invalid or missing query')
     }
 
-    const response = await searchSong(accessToken, query)
-    const formattedResponse = response.data.tracks.items.map((item: any) => {
-        return {
-            uri: item.uri,
-            name: item.name,
-            artists: item.artists.map((artist: any) => artist.name).join(', '),
-            album: item.album.name,
-            albumImage: item.album.images[2].url,
-            duration: item.duration_ms,
-        }
-    })
+    try {
+        const response = await searchSong(accessToken, query)
+        const formattedResponse = mapSongsData(response.data.tracks.items)
 
-    res.send(formattedResponse)
+        res.send(formattedResponse)
+    } catch(e) {
+        res.status(500).send('Error while searching song')
+    }
 }

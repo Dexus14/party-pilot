@@ -44,3 +44,16 @@ export async function refreshTokenIfNeeded(user: Prisma.UserGetPayload<{}>) {
 export function getSpotifyAuthString() {
     return 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')
 }
+
+export function mapSongsData(songs: any[]) {
+    return songs.map((item: any) => {
+        return {
+            uri: item.uri,
+            name: item.name,
+            artists: item.artists.map((artist: any) => artist.name).join(', '),
+            album: item.album.name,
+            albumImage: item.album.images[2].url,
+            duration: item.duration_ms,
+        }
+    })
+}
