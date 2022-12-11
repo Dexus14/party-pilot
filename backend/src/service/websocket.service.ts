@@ -47,9 +47,9 @@ export function createWebsocketListeners(io: Server<
 }
 
 async function eventSongPrevious(socket: Socket, roomId: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-
     try {
+        const accessToken = await getRoomOwnerToken(roomId)
+
         await previousSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
@@ -58,9 +58,9 @@ async function eventSongPrevious(socket: Socket, roomId: string) {
 }
 
 async function eventSongNext(socket: Socket, roomId: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-
     try {
+        const accessToken = await getRoomOwnerToken(roomId)
+
         await nextSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
@@ -69,9 +69,9 @@ async function eventSongNext(socket: Socket, roomId: string) {
 }
 
 async function eventSongPause(socket: Socket, roomId: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-
     try {
+        const accessToken = await getRoomOwnerToken(roomId)
+
         await pauseSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
@@ -80,9 +80,9 @@ async function eventSongPause(socket: Socket, roomId: string) {
 }
 
 async function eventSongResume(socket: Socket, roomId: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-
     try {
+        const accessToken = await getRoomOwnerToken(roomId)
+
         await resumeSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
@@ -91,9 +91,9 @@ async function eventSongResume(socket: Socket, roomId: string) {
 }
 
 async function eventSongAddToQueue(socket: Socket, roomId: string, userRoomId: string, songUri: string) {
-    const accessToken = await getRoomOwnerToken(roomId)
-
     try {
+        const accessToken = await getRoomOwnerToken(roomId)
+
         await addSongToQueue(accessToken, songUri)
         roomUserAddSong(roomId, userRoomId, songUri)
 

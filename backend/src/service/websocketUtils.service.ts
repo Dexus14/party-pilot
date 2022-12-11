@@ -70,12 +70,12 @@ export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
 export async function getRoomOwnerToken(roomId: string) {
     const room = getRoom(roomId)
     if (!room) {
-        throw new Error('getRoomOwnerToken: Room does not exist')
+        throw new Error('Room does not exist')
     }
 
     const user = await getUserBySpotifyId(room.ownerSpotifyId)
     if (!user) {
-        throw new Error('getRoomOwnerToken: User does not exist')
+        throw new Error('User does not exist')
     }
 
     return await refreshTokenIfNeeded(user)
