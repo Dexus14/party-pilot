@@ -3,6 +3,7 @@ export interface ServerToClientEvents {
     noRoom: () => void;
     trackUpdate: (trackData: any) => void; // TODO: Add types here
     roomQueueUpdate: (queue: any) => void; // TODO: Add types here
+    overSongLimit: () => void;
     error: (message: string) => void;
 }
 

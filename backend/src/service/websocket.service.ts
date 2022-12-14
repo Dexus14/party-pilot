@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getQueueWithRoomUsers, roomUserAddSong, setRoomUserActive} from "./rooms.service";
+import {canUserAddSong, getAndUpdateQueueWithRoomUsers, roomUserAddSong, setRoomUserActive} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
 import {addSongToQueue, nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
@@ -26,7 +26,7 @@ export function createWebsocketListeners(io: Server<
             setRoomUserActive(roomId, userRoomId, true)
             await updateRoomTrack(roomId, socket)
             await socketRoomUpdate(io, roomId)
-            socket.emit('roomQueueUpdate', await getQueueWithRoomUsers(roomId))
+            socket.emit('roomQueueUpdate', await getAndUpdateQueueWithRoomUsers(roomId))
         } catch(e) {
             if(e instanceof Error) {
                 handleSocketError(socket, e, false, true)
@@ -94,10 +94,14 @@ async function eventSongAddToQueue(socket: Socket, roomId: string, userRoomId: s
     try {
         const accessToken = await getRoomOwnerToken(roomId)
 
+        if(!canUserAddSong(roomId, userRoomId)) {
+            return socket.emit('overSongLimit')
+        }
+
         await addSongToQueue(accessToken, songUri)
         roomUserAddSong(roomId, userRoomId, songUri)
 
-        const queueWithUserData = await getQueueWithRoomUsers(roomId)
+        const queueWithUserData = await getAndUpdateQueueWithRoomUsers(roomId)
         socket.emit('roomQueueUpdate', queueWithUserData)
         socket.to(roomId).emit('roomQueueUpdate', queueWithUserData)
     } catch(e) {

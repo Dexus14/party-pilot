@@ -10,6 +10,7 @@ interface Room {
     id: string
     ownerSpotifyId: string
     users: RoomUser[]
+    options: RoomOptions
 }
 
 interface RoomPlaybackStateData {
@@ -20,4 +21,9 @@ interface RoomPlaybackStateData {
 
     artists: any[]
     album: any[]
+}
+
+interface RoomOptions {
+    name: string
+    songsPerUser: number
 }

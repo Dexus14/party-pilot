@@ -54,7 +54,11 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     const room: Room = {
         id: roomId,
         ownerSpotifyId: ownerId,
-        users: []
+        users: [],
+        options: {
+            name: spotifyOwnerData.data.display_name + "'s room",
+            songsPerUser: process.env.DEFAULT_SONGS_PER_USER ? parseInt(process.env.DEFAULT_SONGS_PER_USER) : 3
+        }
     }
 
     setRoom(room)
@@ -153,16 +157,19 @@ export function roomUserAddSong(roomId: string, roomUserId: string, songUri: str
     setRoom(room)
 }
 
-export async function getQueueWithRoomUsers(roomId: string) {
+export async function getAndUpdateQueueWithRoomUsers(roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
-    const room = getRoom(roomId)
+    let room = getRoom(roomId)
     if(!room) {
         throw new Error('Room does not exist')
     }
     const response = await getQueue(accessToken)
     const queue = response.data.queue
 
+    room = filterUserSongsWithQueue(room, queue)
+
     return queue.map((song: any) => {
+        // @ts-ignore
         const roomUsers = room.users.filter(user => user.songs.includes(song.uri))
         const roomUserNames = roomUsers.map(user => user.username)
         return {
@@ -171,6 +178,30 @@ export async function getQueueWithRoomUsers(roomId: string) {
             users: roomUserNames
         }
     })
+}
+
+export function canUserAddSong(roomId: string, roomUserId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    const roomUser = room.users.find(user => user.id === roomUserId)
+    if(!roomUser) {
+        throw new Error('Room user does not exist')
+    }
+
+    return roomUser.songs.length < room.options.songsPerUser
+}
+
+export function filterUserSongsWithQueue(room: Room, queue: any[]) {
+    room.users = room.users.map(user => {
+        user.songs = user.songs.filter(song => queue.some((queueItem: any) => queueItem.uri === song))
+        return user
+    })
+
+    setRoom(room)
+    return room
 }
 
 function generateRoomId() {

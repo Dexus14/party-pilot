@@ -30,6 +30,8 @@ function App() {
 
         socket.on('roomQueueUpdate', (queue) => setQueue(queue))
 
+        socket.on('overSongLimit', () => console.log('overSongLimit'))
+
         socket.on('error', console.log)
 
         return () => {
@@ -45,7 +47,7 @@ function App() {
 
     return (
         <div className="App">
-            <h1>hi</h1>
+            <h1>{ room?.options?.name ?? 'loading name' }</h1>
 
             <p>User: { cookies?.roomUser?.name ?? 'no' }</p>
             <p>In room: { cookies?.roomUser?.roomId ?? 'no' }</p>
