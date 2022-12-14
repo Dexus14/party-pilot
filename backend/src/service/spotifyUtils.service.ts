@@ -16,7 +16,7 @@ export function getSpotifyAuthLink() {
 }
 
 export async function refreshTokenIfNeeded(user: Prisma.UserGetPayload<{}>) {
-    const now = new Date('now')
+    const now = new Date()
     const lastRefresh = new Date(user.lastRefresh)
     const diff = now.getTime() - lastRefresh.getTime()
     if(!process.env.SPOTIFY_TOKEN_LIFETIME_MILLIS) {
@@ -52,7 +52,7 @@ export function mapSongsData(songs: any[]) {
             name: item.name,
             artists: item.artists.map((artist: any) => artist.name).join(', '),
             album: item.album.name,
-            albumImage: item.album.images[2].url,
+            albumImage: item.album.images[1].url,
             duration: item.duration_ms,
         }
     })

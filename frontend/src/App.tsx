@@ -2,11 +2,15 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import {useCookies} from "react-cookie";
 import {io} from "socket.io-client";
-import Unauthorized from "./components/Unauthorized/Unauthorized";
-import RoomUsers from "./components/RoomUsers/RoomUsers";
-import CurrentlyPlaying from "./components/CurrentlyPlaying/CurrentlyPlaying";
-import SongSearch from "./components/SongSearch/SongSearch";
-import SongQueue from "./components/SongQueue/SongQueue";
+import Unauthorized from "./components/Unauthorized";
+import RoomUsers from "./components/RoomUsers";
+import CurrentlyPlaying from "./components/CurrentlyPlaying";
+import SongSearch from "./components/SongSearch";
+import SongQueue from "./components/SongQueue";
+import MusicPlayer from "./components/MusicPlayer";
+import {Col, Container, Form, Placeholder, Row} from "react-bootstrap";
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 const socket = io("ws://192.168.8.108:8000", {
@@ -16,7 +20,7 @@ const socket = io("ws://192.168.8.108:8000", {
 function App() {
     const [cookies, setCookie, removeCookie] = useCookies(['roomUser'])
     const [isAuthorized, setIsAuthorized] = useState(true)
-    // TODO: Remove his after tests
+    const [isSearching, setIsSearching] = useState(false)
     const [room, setRoom] = useState<any | null>(null)
     const [queue, setQueue] = useState<any | null>(null)
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
@@ -41,32 +45,102 @@ function App() {
         }
     }, [])
 
-    if(!isAuthorized) {
+    if(!isAuthorized || !room) {
         return <Unauthorized />
     }
 
+    if(isSearching) {
+        return (<SongSearch socket={socket} searchingStateUpdate={setIsSearching} />)
+    }
+
     return (
-        <div className="App">
-            <h1>{ room?.options?.name ?? 'loading name' }</h1>
+        <Container id={"app"}>
+            <Row className={"mt-3"}>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    <h1 className={"room-name"}>
+                        {room?.options?.name ?? <Placeholder />}
+                    </h1>
+                </Col>
+            </Row>
 
-            <p>User: { cookies?.roomUser?.name ?? 'no' }</p>
-            <p>In room: { cookies?.roomUser?.roomId ?? 'no' }</p>
+            <Row className={"mt-3"}>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    <Form.Floating className="mb-3">
+                        <Form.Control
+                            id="search-song-input"
+                            type="text"
+                            placeholder="Search song"
+                            onFocus={() => setIsSearching(true)}
+                        />
+                        <label htmlFor="search-song-input">Search song</label>
+                    </Form.Floating>
+                </Col>
+            </Row>
 
-            <button id={"btn-leave"} onClick={() => removeCookie('roomUser')}>I don't wanna be here anymore!</button>
+            <Row>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    <p className={"room-code"}>
+                        Room code: {room?.id ?? <Placeholder />}
+                    </p>
+                </Col>
+            </Row>
 
-            <button onClick={() => socket.emit("songPrevious")}> {"<<<<"} </button>
-            {
-                currentTrack?.is_playing ?
-                    <button onClick={() => socket.emit("songPause")}>Pause</button> :
-                    <button onClick={() => socket.emit("songResume")}>Play</button>
-            }
-            <button onClick={() => socket.emit("songNext")}> {">>>>"} </button>
+            <Row className={"mt-4"}>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    {room ? <RoomUsers room={room} currentUsername={cookies.roomUser.username} /> : <Placeholder />}
+                </Col>
+            </Row>
 
-            { room && <RoomUsers room={room} /> }
-            { currentTrack && <CurrentlyPlaying track={currentTrack} /> }
-            { queue && <SongQueue queue={queue} />}
-            <SongSearch socket={socket} />
-        </div>
+            <Row className={"mt-4"}>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    {currentTrack ? <CurrentlyPlaying track={currentTrack} /> : <Placeholder />}
+                </Col>
+            </Row>
+
+            <Row className={"mt-4"}>
+                <Col
+                    xs={{span: 12}}
+                    md={{span:10, offset: 1}}
+                    lg={{span:8, offset: 2}}
+                    xl={{span:6, offset: 3}}
+                >
+                    { queue && <SongQueue queue={queue} />}
+                </Col>
+            </Row>
+
+            <MusicPlayer
+                currentTrack={currentTrack}
+                resumeAction={() => socket.emit('songResume')}
+                pauseAction={() => socket.emit('songPause')}
+                nextAction={() => socket.emit('songNext')}
+                previousAction={() => socket.emit('songPrevious')}
+            />
+        </Container>
     );
 }
 

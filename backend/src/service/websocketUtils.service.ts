@@ -5,7 +5,6 @@ import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
 import {getUserBySpotifyId} from "./database.service";
 import {getPlaybackState} from "./spotifyApi.service";
-import {refreshTokenIfNeeded} from "./spotifyUtils.service";
 
 export function socketConnectToRoom(socket: Socket, roomId: string) {
     const roomExistsance = roomExists(roomId ?? '')
@@ -78,7 +77,7 @@ export async function getRoomOwnerToken(roomId: string) {
         throw new Error('User does not exist')
     }
 
-    return await refreshTokenIfNeeded(user)
+    return user.accessToken
 }
 
 export function handleSocketError(socket: Socket|Server, error: any, serverError: boolean = false, fatal: boolean = false) {

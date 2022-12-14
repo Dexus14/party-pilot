@@ -5,6 +5,7 @@ import {randomString} from "./utils.service";
 import {Server} from "socket.io";
 import {getRoomOwnerToken, updateRoomTrack} from "./websocketUtils.service";
 import {Prisma} from '@prisma/client'
+import {refreshTokenIfNeeded} from "./spotifyUtils.service";
 
 const roomsCache = new NodeCache()
 
@@ -20,7 +21,10 @@ export function updateRoomTracksIntervally(io: Server) {
             }
 
             try {
-                await updateRoomTrack(roomId, io)
+                await Promise.all([
+                    updateRoomTrack(roomId, io),
+                    refreshRoomOwnerTokenIfNeeded(roomId)
+                ])
             } catch (e) {
                 console.error('updateRoomTracksIntervally: ', e)
             }
@@ -202,6 +206,25 @@ export function filterUserSongsWithQueue(room: Room, queue: any[]) {
 
     setRoom(room)
     return room
+}
+
+export async function refreshRoomOwnerTokenIfNeeded(roomId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    const roomOwner = room.ownerSpotifyId
+    if(!roomOwner) {
+        throw new Error('Room owner does not exist')
+    }
+
+    const user = await getUserBySpotifyId(roomOwner)
+    if(!user) {
+        throw new Error('User does not exist')
+    }
+
+    return refreshTokenIfNeeded(user)
 }
 
 function generateRoomId() {
