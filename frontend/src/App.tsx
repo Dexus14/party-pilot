@@ -40,8 +40,11 @@ function App() {
 
         return () => {
             socket.off('roomUpdate')
-            socket.off('someoneHi')
             socket.off('connect_error')
+            socket.off('trackUpdate')
+            socket.off('roomQueueUpdate')
+            socket.off('overSongLimit')
+            socket.off('error')
         }
     }, [])
 
