@@ -11,6 +11,7 @@ import MusicPlayer from "./components/MusicPlayer";
 import {Col, Container, Form, Placeholder, Row} from "react-bootstrap";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ErrorToasts from "./components/ErrorToasts";
 
 
 const socket = io("ws://192.168.8.108:8000", {
@@ -24,6 +25,11 @@ function App() {
     const [room, setRoom] = useState<any | null>(null)
     const [queue, setQueue] = useState<any | null>(null)
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
+    const [errors, setErrors] = useState<string[]>([])
+
+    function removeError(index: number) {
+        setErrors(errors => errors.filter((_, i) => i !== index))
+    }
 
     useEffect(() => {
         socket.on('roomUpdate', (room) => setRoom(room))
@@ -34,9 +40,9 @@ function App() {
 
         socket.on('roomQueueUpdate', (queue) => setQueue(queue))
 
-        socket.on('overSongLimit', () => console.log('overSongLimit'))
+        socket.on('overSongLimit', () => setErrors(last => [...last, 'You have reached the song limit for this room.']))
 
-        socket.on('error', console.log)
+        socket.on('error', (error) => setErrors(last => [...last, error]))
 
         return () => {
             socket.off('roomUpdate')
@@ -48,7 +54,7 @@ function App() {
         }
     }, [])
 
-    if(!isAuthorized || !room) {
+    if(!isAuthorized) {
         return <Unauthorized />
     }
 
@@ -58,6 +64,8 @@ function App() {
 
     return (
         <Container id={"app"}>
+            <ErrorToasts errors={errors} removeError={removeError} />
+
             <Row className={"mt-3"}>
                 <Col
                     xs={{span: 12}}
