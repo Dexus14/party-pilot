@@ -3,7 +3,7 @@ import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
 import {getQueue, getSpotifyUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
 import {Server} from "socket.io";
-import {getRoomOwnerToken, updateRoomTrack} from "./websocketUtils.service";
+import {getRoomOwnerToken, updateRoomQueue, updateRoomTrack} from "./websocketUtils.service";
 import {Prisma} from '@prisma/client'
 import {refreshTokenIfNeeded} from "./spotifyUtils.service";
 
@@ -23,6 +23,7 @@ export function updateRoomTracksIntervally(io: Server) {
             try {
                 await Promise.all([
                     updateRoomTrack(roomId, io),
+                    updateRoomQueue(roomId, io),
                     refreshRoomOwnerTokenIfNeeded(roomId)
                 ])
             } catch (e) {
@@ -161,7 +162,7 @@ export function roomUserAddSong(roomId: string, roomUserId: string, songUri: str
     setRoom(room)
 }
 
-export async function getAndUpdateQueueWithRoomUsers(roomId: string) {
+export async function getQueueWithRoomUsers(roomId: string) {
     const accessToken = await getRoomOwnerToken(roomId)
     let room = getRoom(roomId)
     if(!room) {

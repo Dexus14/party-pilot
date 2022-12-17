@@ -1,5 +1,5 @@
 import {Server, Socket} from "socket.io";
-import {getRoom, roomAndUserExists, roomExists} from "./rooms.service";
+import {getQueueWithRoomUsers, getRoom, roomAndUserExists, roomExists} from "./rooms.service";
 import cookieParser from "cookie-parser";
 import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
@@ -57,9 +57,12 @@ export async function updateRoomTrack(roomId: string, socket: Server|Socket) {
     const playbackState = await getPlaybackState(accessToken)
     const { progress_ms, is_playing } = playbackState.data
 
-    const track = playbackState.data.item
-    const { artists, album, duration_ms, name } = track
-    const data: RoomPlaybackStateData = { name, is_playing, progress_ms, artists, album, duration_ms }
+    let data: RoomPlaybackStateData | null = null
+    if(playbackState.data.item) {
+        const track = playbackState.data.item
+        const { artists, album, duration_ms, name } = track
+        data = { name, is_playing, progress_ms, artists, album, duration_ms }
+    }
 
     socket.to(roomId).emit('trackUpdate', data)
     // Send data to the owner of the socket if one exists
@@ -78,6 +81,14 @@ export async function getRoomOwnerToken(roomId: string) {
     }
 
     return user.accessToken
+}
+
+export async function updateRoomQueue(roomId: string, socket: Server|Socket) {
+    const queue = await getQueueWithRoomUsers(roomId)
+
+    socket.to(roomId).emit('roomQueueUpdate', queue)
+    // Send data to the owner of the socket if one exists
+    socket instanceof Socket && socket.emit('roomQueueUpdate', queue)
 }
 
 export function handleSocketError(socket: Socket|Server, error: any, serverError: boolean = false, fatal: boolean = false) {
