@@ -11,9 +11,10 @@ import {Button, Col, Container, Form, Placeholder, Row, Spinner} from "react-boo
 
 import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
+import {RoomId} from "./components/RoomId";
 
 
-const socket = io("ws://192.168.8.108:8000", {
+const socket = io(process.env.REACT_APP_WEBSOCKET_URL ?? '', {
     withCredentials: true
 })
 
@@ -110,9 +111,7 @@ function App() {
                     lg={{span:8, offset: 2}}
                     xl={{span:6, offset: 3}}
                 >
-                    <p className={"room-code"}>
-                        Room code: {room?.id ?? <Placeholder animation={'glow'}><Placeholder xs={1} size={'xs'} /></Placeholder>}
-                    </p>
+                    <RoomId room={room} />
 
                     <div className={'d-flex justify-content-center align-items-center'}>
                         <Button className={'me-5'} variant={"primary"} onClick={() => setInOptions(true)}>
@@ -145,7 +144,7 @@ function App() {
                 </Col>
             </Row>
 
-            { !queue && !currentTrack ? (
+            { !currentTrack ? (
                 <Row className={"mt-5"}>
                     <Col
                         xs={{span: 12}}

@@ -40,6 +40,8 @@ app.use('/api/spotify', spotifyRoutes)
 
 // Path for static files required by React app
 app.use(express.static(path.join(__dirname, '../../frontend/build')))
+// Public path
+app.use(express.static(path.join(__dirname, '../src/views/public')))
 
 app.get('/app', async (req, res) => {
     process.env.APP_ENV === 'dev' ?
