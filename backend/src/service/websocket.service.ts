@@ -122,7 +122,7 @@ async function eventUpdateRoomOptions(socket: Socket, roomId: string, userRoomId
         const roomUser = getRoomUser(roomId, userRoomId)
 
         if(!roomUser.isOwner) {
-            throw new Error('You are not the owner of this room')
+            return handleSocketError(socket, new Error('Only the owner can change options.'), false)
         }
 
         await updateRoomOptions(roomId, options)

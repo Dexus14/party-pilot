@@ -8,14 +8,14 @@ export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
 const SPOTIFY_AUTH_API_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const SPOTIFY_API_URL = 'https://api.spotify.com/v1'
 
-export async function authSpotify(req: Request) {
+export async function authSpotify(req: Request, redirectToDestroy: boolean = false) {
     const code = req.query.code
 
     const authString = 'Basic ' + Buffer.from(process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET).toString('base64')
 
     const parsedFormData = encodeFormData({
         code,
-        redirect_uri: process.env.SPOTIFY_AUTH_REDIRECT_URL,
+        redirect_uri: redirectToDestroy ? process.env.SPOTIFY_DESTROY_REDIRECT_URL : process.env.SPOTIFY_AUTH_REDIRECT_URL,
         grant_type: 'authorization_code'
     })
 

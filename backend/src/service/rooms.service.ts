@@ -7,7 +7,8 @@ import {getRoomOwnerToken, updateRoomQueue, updateRoomTrack} from "./websocketUt
 import {Prisma} from '@prisma/client'
 import {refreshTokenIfNeeded} from "./spotifyUtils.service";
 
-const roomsCache = new NodeCache()
+const roomsCache = new NodeCache() // TODO: Add TTL
+const roomOwnersCache = new NodeCache()
 
 const roomsToUpdate = new Set<string>()
 
@@ -33,8 +34,8 @@ export function updateRoomTracksIntervally(io: Server) {
     }, parseInt(process.env.TRACK_UPDATE_INTERVAL_MS as string))
 }
 
-export async function createOrGetRoom(ownerData: any): Promise<string> {
-    const spotifyOwnerData = await getSpotifyUserData(ownerData.access_token)
+export async function createOrGetRoom(authData: any, ownerSpotifyId: string): Promise<string> {
+    const spotifyOwnerData = await getSpotifyUserData(authData.access_token)
 
     const ownerId = spotifyOwnerData.data.id
     let user = await getUserBySpotifyId(ownerId)
@@ -48,8 +49,8 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     const newUserData: Prisma.UserCreateInput = {
         spotifyId: ownerId,
         roomId,
-        accessToken: ownerData.access_token,
-        refreshToken: ownerData.refresh_token,
+        accessToken: authData.access_token,
+        refreshToken: authData.refresh_token,
         lastRefresh: new Date()
     }
 
@@ -69,6 +70,7 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
     }
 
     setRoom(room)
+    roomOwnersCache.set(ownerSpotifyId, roomId)
     roomsToUpdate.add(roomId)
 
     return room.id
@@ -268,6 +270,16 @@ export async function updateRoomOptions(roomId: string, options: RoomOptions) {
     setRoom(room)
 
     return room
+}
+
+export function destroyRoomByOwnerId(ownerSpotifyId: string) {
+    const roomId = roomOwnersCache.get(ownerSpotifyId) as string|undefined
+    if(!roomId) {
+        return
+    }
+
+    roomsCache.del(roomId)
+    roomOwnersCache.del(ownerSpotifyId)
 }
 
 function generateRoomId() {

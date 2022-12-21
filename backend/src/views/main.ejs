@@ -4,15 +4,21 @@
     style="height: 100%;"
     >
         <div style="height: 100%;" class="d-flex flex-column align-items-center justify-content-center">
-            <a style="width: 50%;" class="mb-4" href="/room/auth/spotify">
+            <a style="width: 50%;" class="mb-3" href="/room/auth/spotify">
                 <button style="width: 100%; height: 10vh;" class="btn btn-lg btn-primary">
                     Create room
                 </button>
             </a>
 
-            <a style="width: 50%;" href="/room/join">
+            <a style="width: 50%;" class="mb-3" href="/room/join">
                 <button style="width: 100%; height: 10vh;" class="btn btn-lg btn-outline-primary">
                     Join room
+                </button>
+            </a>
+
+            <a style="width: 50%;" href="/room/auth/spotify?destroy=1">
+                <button style="width: 100%; height: 10vh;" class="btn btn-lg btn-outline-danger">
+                    Destroy room
                 </button>
             </a>
         </div>

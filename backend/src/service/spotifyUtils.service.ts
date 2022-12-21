@@ -4,13 +4,13 @@ import {randomString} from "./utils.service";
 import {Prisma} from "@prisma/client";
 import {updateUser} from "./database.service";
 
-export function getSpotifyAuthLink() {
+export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
     return SPOTIFY_AUTH_API_URL + '?' +
         querystring.stringify({
             response_type: 'code',
             client_id: process.env.SPOTIFY_CLIENT_ID,
             scope: SPOTFIY_SCOPES,
-            redirect_uri: process.env.SPOTIFY_AUTH_REDIRECT_URL,
+            redirect_uri: redirectToDestroy ? process.env.SPOTIFY_DESTROY_REDIRECT_URL : process.env.SPOTIFY_AUTH_REDIRECT_URL,
             state: randomString(16) // FIXME: How to use this state properly?
         })
 }

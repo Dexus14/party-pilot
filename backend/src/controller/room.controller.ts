@@ -1,7 +1,7 @@
-import {authSpotify} from "../service/spotifyApi.service";
+import {authSpotify, getSpotifyUserData} from "../service/spotifyApi.service";
 import {
     createOrGetRoom,
-    createRoomUser,
+    createRoomUser, destroyRoomByOwnerId,
     getRoomOwner,
     removeRoomUser,
     roomAndUserExists,
@@ -12,9 +12,10 @@ import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
     try {
-        const ownerData = await authSpotify(req)
+        const authData = await authSpotify(req)
+        const ownerData = await getSpotifyUserData(authData.access_token)
 
-        const roomId = await createOrGetRoom(ownerData)
+        const roomId = await createOrGetRoom(authData, ownerData.data.id)
 
         // TODO: maybe generate random username?
         const roomUserData = req.cookies.roomUser
@@ -36,6 +37,11 @@ export async function roomCreateGet(req: express.Request, res: express.Response)
 }
 
 export async function roomAuthGet(req: express.Request, res: express.Response) {
+    if(req?.query?.destroy === '1') {
+        const url = getSpotifyAuthLink(true)
+        return res.redirect(url)
+    }
+
     const url = getSpotifyAuthLink()
     res.redirect(url)
 }
@@ -73,4 +79,19 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
     }
 
     res.redirect(process.env.APP_URL ?? '')
+}
+
+// TODO: In the future consider adding a way to remove room by user email
+export async function destroyRoomGet(req: express.Request, res: express.Response) {
+    try {
+        const authData = await authSpotify(req, true)
+        const ownerData = await getSpotifyUserData(authData.access_token)
+
+        destroyRoomByOwnerId(ownerData.data.id)
+
+        res.redirect('/?success=roomDestroyed')
+    } catch (e) {
+        console.log(e)
+        return res.redirect('/?error=errorDestroying')
+    }
 }
