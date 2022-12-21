@@ -4,12 +4,30 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+const LightTheme = React.lazy(() => import('./components/themes/lightTheme'));
+const DarkTheme = React.lazy(() => import('./components/themes/darkTheme'));
+
+const ThemeSelector = ({ children }: { children: JSX.Element }) => {
+    const CHOSEN_THEME = localStorage.getItem('TYPE_OF_THEME') || 'dark';
+    return (
+        <>
+            <React.Suspense fallback={<></>}>
+                {(CHOSEN_THEME === 'light') && <LightTheme />}
+                {(CHOSEN_THEME === 'dark') && <DarkTheme />}
+            </React.Suspense>
+            {children}
+        </>
+    )
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+      <ThemeSelector>
+          <App />
+      </ThemeSelector>
   </React.StrictMode>
 );
 

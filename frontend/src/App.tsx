@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import './App.css';
 import {useCookies} from "react-cookie";
 import {io} from "socket.io-client";
 import Unauthorized from "./components/Unauthorized";
@@ -10,7 +9,6 @@ import SongQueue from "./components/SongQueue";
 import MusicPlayer from "./components/MusicPlayer";
 import {Button, Col, Container, Form, Placeholder, Row} from "react-bootstrap";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
 
@@ -28,6 +26,7 @@ function App() {
     const [queue, setQueue] = useState<any | null>(null)
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
     const [errors, setErrors] = useState<string[]>([])
+    const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('TYPE_OF_THEME') || 'dark')
 
     function removeError(index: number) {
         setErrors(errors => errors.filter((_, i) => i !== index))
@@ -115,10 +114,22 @@ function App() {
                         Room code: {room?.id ?? <Placeholder />}
                     </p>
 
-                    <div className={'d-flex justify-content-center'}>
-                        <Button variant={"primary"} onClick={() => setInOptions(true)}>
+                    <div className={'d-flex justify-content-center align-items-center'}>
+                        <Button className={'me-5'} variant={"primary"} onClick={() => setInOptions(true)}>
                             Options
                         </Button>
+                        <Form.Check
+                            type="switch"
+                            id="theme-switch"
+                            label="Dark theme"
+                            checked={selectedTheme === 'dark'}
+                            onChange={(e) => {
+                                setSelectedTheme(e.target.checked ? 'dark' : 'light')
+                                localStorage.setItem('TYPE_OF_THEME', e.target.checked ? 'dark' : 'light')
+                                window.location.reload()
+                            }
+                            }
+                        />
                     </div>
                 </Col>
             </Row>

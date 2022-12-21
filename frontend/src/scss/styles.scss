@@ -4,8 +4,6 @@
 }
 
 body {
-  color: #726E60;
-  background-color: black;
   font-family: 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
@@ -40,7 +38,7 @@ body {
 
 /* PLAYER */
 .music-player {
-  background-color: white;
+  background-color: var(--bs-body-bg);
 
   width: 100vw;
   position: fixed;
@@ -71,6 +69,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (prefers-color-scheme: dark) {
+
 }
 
 .searching {

@@ -18,7 +18,7 @@ export default function RoomUsers({ room, currentUsername }: { room: any, curren
                         <tr key={key}>
                             <td>{key+1}</td>
                             <td
-                                style={{ color: user.currentlyActive ? 'black' : 'lightgray' }}
+                                // style={{ color: user.currentlyActive ? 'black' : 'lightgray' }}
                             >
                                 {user.username === currentUsername ? <>{user.username} (you)</> : <>{user.username}</>}
                             </td>
