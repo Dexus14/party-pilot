@@ -8,10 +8,11 @@ import CurrentlyPlaying from "./components/CurrentlyPlaying";
 import SongSearch from "./components/SongSearch";
 import SongQueue from "./components/SongQueue";
 import MusicPlayer from "./components/MusicPlayer";
-import {Col, Container, Form, Placeholder, Row} from "react-bootstrap";
+import {Button, Col, Container, Form, Placeholder, Row} from "react-bootstrap";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ErrorToasts from "./components/ErrorToasts";
+import OptionsMenu from "./components/OptionsMenu";
 
 
 const socket = io("ws://192.168.8.108:8000", {
@@ -22,6 +23,7 @@ function App() {
     const [cookies, setCookie, removeCookie] = useCookies(['roomUser'])
     const [isAuthorized, setIsAuthorized] = useState(true)
     const [isSearching, setIsSearching] = useState(false)
+    const [inOptions, setInOptions] = useState(false)
     const [room, setRoom] = useState<any | null>(null)
     const [queue, setQueue] = useState<any | null>(null)
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
@@ -60,6 +62,10 @@ function App() {
 
     if(isSearching) {
         return (<SongSearch socket={socket} searchingStateUpdate={setIsSearching} />)
+    }
+
+    if(inOptions) {
+        return (<OptionsMenu socket={socket} room={room} optionsStateUpdate={setInOptions} />)
     }
 
     return (
@@ -108,6 +114,12 @@ function App() {
                     <p className={"room-code"}>
                         Room code: {room?.id ?? <Placeholder />}
                     </p>
+
+                    <div className={'d-flex justify-content-center'}>
+                        <Button variant={"primary"} onClick={() => setInOptions(true)}>
+                            Options
+                        </Button>
+                    </div>
                 </Col>
             </Row>
 

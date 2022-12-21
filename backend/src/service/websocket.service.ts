@@ -1,5 +1,12 @@
 import {Server, Socket} from "socket.io";
-import {canUserAddSong, getQueueWithRoomUsers, roomUserAddSong, setRoomUserActive} from "./rooms.service";
+import {
+    canUserAddSong,
+    getQueueWithRoomUsers,
+    getRoomUser,
+    roomUserAddSong,
+    setRoomUserActive,
+    updateRoomOptions
+} from "./rooms.service";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "../interafce/socketInterfaces";
 import {addSongToQueue, nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
@@ -41,6 +48,7 @@ export function createWebsocketListeners(io: Server<
         socket.on('songPause', () => eventSongPause(socket, roomId))
         socket.on('songResume', () => eventSongResume(socket, roomId))
         socket.on('songAddToQueue', (songUri) => eventSongAddToQueue(socket, roomId, userRoomId, songUri))
+        socket.on('updateRoomOptions', (options) => eventUpdateRoomOptions(socket, roomId, userRoomId, options))
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })
@@ -104,6 +112,21 @@ async function eventSongAddToQueue(socket: Socket, roomId: string, userRoomId: s
         const queueWithUserData = await getQueueWithRoomUsers(roomId)
         socket.emit('roomQueueUpdate', queueWithUserData)
         socket.to(roomId).emit('roomQueueUpdate', queueWithUserData)
+    } catch(e) {
+        handleSocketError(socket, e, true)
+    }
+}
+
+async function eventUpdateRoomOptions(socket: Socket, roomId: string, userRoomId: string, options: RoomOptions) {
+    try {
+        const roomUser = getRoomUser(roomId, userRoomId)
+
+        if(!roomUser.isOwner) {
+            throw new Error('You are not the owner of this room')
+        }
+
+        await updateRoomOptions(roomId, options)
+        await socketRoomUpdate(socket, roomId, true)
     } catch(e) {
         handleSocketError(socket, e, true)
     }

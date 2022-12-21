@@ -16,13 +16,14 @@ export function socketConnectToRoom(socket: Socket, roomId: string) {
     socket.join(roomId)
 }
 
-export async function socketRoomUpdate(socket: Server|Socket, roomId: string) {
+export async function socketRoomUpdate(socket: Server|Socket, roomId: string, emitToSelf = false) {
     const room = getRoom(roomId)
     if(!room) {
         throw new Error('This room does not exist.')
     }
 
     socket.to(roomId).emit('roomUpdate', room)
+    emitToSelf && socket.emit('roomUpdate', room)
 }
 
 export function getRoomAndUserFromCookie(cookieString: string) {

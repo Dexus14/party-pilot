@@ -9,7 +9,12 @@ export async function roomCreateGet(req: express.Request, res: express.Response)
 
         const roomId = await createOrGetRoom(ownerData)
 
-        res.redirect(`/room/join/${roomId}`)
+            // TODO: maybe generate random username?
+        const roomUser = createRoomUser(roomId, 'owner', true)
+
+        return res.cookie('roomUser', roomUser, {
+            maxAge: 1000 * 60 * 60 * 24 // 1 day
+        }).redirect(process.env.APP_URL ?? '')
     } catch (e) {
         res.status(500).send('Error while creating room')
     }
@@ -46,6 +51,7 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
     // Do nothing if he already is in the room
     if(roomUserData === undefined || roomUserData.roomId !== roomId) {
         const roomUser = createRoomUser(roomId, username)
+
         return res.cookie('roomUser', roomUser, {
             maxAge: 1000 * 60 * 60 * 24 // 1 day
         }).redirect(process.env.APP_URL ?? '')

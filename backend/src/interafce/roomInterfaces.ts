@@ -4,6 +4,7 @@ interface RoomUser {
     roomId: string
     currentlyActive: boolean
     songs: string[]
+    isOwner: boolean
 }
 
 interface Room {
@@ -26,4 +27,6 @@ interface RoomPlaybackStateData {
 interface RoomOptions {
     name: string
     songsPerUser: number
+    equality: boolean
+    skipVotes: number
 }

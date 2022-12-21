@@ -13,6 +13,7 @@ export interface ClientToServerEvents {
     songPause: () => void;
     songResume: () => void;
     songAddToQueue: (songId: string) => void;
+    updateRoomOptions: (options: RoomOptions) => void;
 }
 
 export interface InterServerEvents {

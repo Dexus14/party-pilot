@@ -62,7 +62,9 @@ export async function createOrGetRoom(ownerData: any): Promise<string> {
         users: [],
         options: {
             name: spotifyOwnerData.data.display_name + "'s room",
-            songsPerUser: process.env.DEFAULT_SONGS_PER_USER ? parseInt(process.env.DEFAULT_SONGS_PER_USER) : 3
+            songsPerUser: 0,
+            equality: false,
+            skipVotes: 0
         }
     }
 
@@ -94,7 +96,7 @@ export function roomAndUserExists(roomId: string, roomUserId: string) {
     return room.users.some(user => user.id === roomUserId)
 }
 
-export function createRoomUser(roomId: string, username: string) {
+export function createRoomUser(roomId: string, username: string, isOwner: boolean = false) {
     const room = getRoom(roomId)
     if(!room) {
         throw new Error('Room does not exist')
@@ -105,7 +107,8 @@ export function createRoomUser(roomId: string, username: string) {
         username,
         roomId,
         currentlyActive: false,
-        songs: []
+        songs: [],
+        isOwner
     }
 
     // If by chance the id is already taken, generate a new one
@@ -119,6 +122,19 @@ export function createRoomUser(roomId: string, username: string) {
     return roomUser
 }
 
+export function getRoomUser(roomId: string, roomUserId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    const roomUser = room.users.find(user => user.id === roomUserId)
+    if(!roomUser) {
+        throw new Error('Room user does not exist')
+    }
+
+    return roomUser
+}
 export function removeRoomUser(roomId: string, roomUserId: string) {
     const room = getRoom(roomId)
     if(!room) {
@@ -196,6 +212,10 @@ export function canUserAddSong(roomId: string, roomUserId: string) {
         throw new Error('Room user does not exist')
     }
 
+    if(room.options.songsPerUser === 0) {
+        return true
+    }
+
     return roomUser.songs.length < room.options.songsPerUser
 }
 
@@ -226,6 +246,18 @@ export async function refreshRoomOwnerTokenIfNeeded(roomId: string) {
     }
 
     return refreshTokenIfNeeded(user)
+}
+
+export async function updateRoomOptions(roomId: string, options: RoomOptions) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    room.options = options
+    setRoom(room)
+
+    return room
 }
 
 function generateRoomId() {
