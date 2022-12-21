@@ -135,6 +135,16 @@ export function getRoomUser(roomId: string, roomUserId: string) {
 
     return roomUser
 }
+
+export function getRoomOwner(roomId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    return room.users.find(user => user.isOwner)
+}
+
 export function removeRoomUser(roomId: string, roomUserId: string) {
     const room = getRoom(roomId)
     if(!room) {

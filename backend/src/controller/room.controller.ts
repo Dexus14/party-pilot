@@ -1,5 +1,12 @@
 import {authSpotify} from "../service/spotifyApi.service";
-import {createOrGetRoom, createRoomUser, removeRoomUser, roomExists} from "../service/rooms.service";
+import {
+    createOrGetRoom,
+    createRoomUser,
+    getRoomOwner,
+    removeRoomUser,
+    roomAndUserExists,
+    roomExists
+} from "../service/rooms.service";
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 
@@ -9,14 +16,22 @@ export async function roomCreateGet(req: express.Request, res: express.Response)
 
         const roomId = await createOrGetRoom(ownerData)
 
-            // TODO: maybe generate random username?
-        const roomUser = createRoomUser(roomId, 'owner', true)
+        // TODO: maybe generate random username?
+        const roomUserData = req.cookies.roomUser
+        if (roomUserData && roomAndUserExists(roomId, roomUserData.id)) {
+            return res.redirect(process.env.APP_URL ?? '')
+        }
+
+        let roomUser = getRoomOwner(roomId)
+        if(roomExists(roomId) && !roomUser) {
+            roomUser = createRoomUser(roomId, 'owner', true)
+        }
 
         return res.cookie('roomUser', roomUser, {
             maxAge: 1000 * 60 * 60 * 24 // 1 day
         }).redirect(process.env.APP_URL ?? '')
     } catch (e) {
-        res.status(500).send('Error while creating room')
+        res.status(500).send('Error while creating room') // TODO: add error site
     }
 }
 
@@ -57,5 +72,5 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
         }).redirect(process.env.APP_URL ?? '')
     }
 
-    res.redirect('/app')
+    res.redirect(process.env.APP_URL ?? '')
 }
