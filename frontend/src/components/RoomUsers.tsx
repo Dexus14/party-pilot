@@ -1,4 +1,22 @@
-import {Table} from "react-bootstrap";
+import {Placeholder, Spinner, Table} from "react-bootstrap";
+
+function generatePlaceholder() {
+    return [...Array(3)].map((_: any, key: number) => {
+        return (
+            <tr key={key}>
+                <td>{key+1}</td>
+                <td>
+                    <Placeholder animation={'glow'}>
+                        <Placeholder xs={Math.floor(2 + Math.random() * 5)} size={'sm'} />
+                    </Placeholder>
+                </td>
+                <td className={"text-center"}>
+                    <Spinner animation="grow" />
+                </td>
+            </tr>
+        )
+    })
+}
 
 export default function RoomUsers({ room, currentUsername }: { room: any, currentUsername: string }) {
     return (
@@ -11,14 +29,14 @@ export default function RoomUsers({ room, currentUsername }: { room: any, curren
                 </tr>
             </thead>
             <tbody>
-                { room.users.map((user: any, key: number) => {
+                { !room ? generatePlaceholder() : room.users.map((user: any, key: number) => {
                     const avatar = 'https://api.multiavatar.com/' + user.username + '.svg'
 
                     return (
                         <tr key={key}>
                             <td>{key+1}</td>
                             <td
-                                // style={{ color: user.currentlyActive ? 'black' : 'lightgray' }}
+                                style={{ fontWeight: user.currentlyActive ? 'bold' : 'normal' }}
                             >
                                 {user.username === currentUsername ? <>{user.username} (you)</> : <>{user.username}</>}
                             </td>

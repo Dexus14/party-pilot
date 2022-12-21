@@ -7,7 +7,7 @@ import CurrentlyPlaying from "./components/CurrentlyPlaying";
 import SongSearch from "./components/SongSearch";
 import SongQueue from "./components/SongQueue";
 import MusicPlayer from "./components/MusicPlayer";
-import {Button, Col, Container, Form, Placeholder, Row} from "react-bootstrap";
+import {Button, Col, Container, Form, Placeholder, Row, Spinner} from "react-bootstrap";
 
 import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
@@ -79,7 +79,7 @@ function App() {
                     xl={{span:6, offset: 3}}
                 >
                     <h1 className={"room-name"}>
-                        {room?.options?.name ?? <Placeholder />}
+                        {room?.options?.name ?? <Placeholder animation={'glow'}><Placeholder xs={6} size={'sm'} /></Placeholder>}
                     </h1>
                 </Col>
             </Row>
@@ -111,7 +111,7 @@ function App() {
                     xl={{span:6, offset: 3}}
                 >
                     <p className={"room-code"}>
-                        Room code: {room?.id ?? <Placeholder />}
+                        Room code: {room?.id ?? <Placeholder animation={'glow'}><Placeholder xs={1} size={'xs'} /></Placeholder>}
                     </p>
 
                     <div className={'d-flex justify-content-center align-items-center'}>
@@ -144,6 +144,23 @@ function App() {
                     {room ? <RoomUsers room={room} currentUsername={cookies.roomUser.username} /> : <Placeholder />}
                 </Col>
             </Row>
+
+            { !queue && !currentTrack ? (
+                <Row className={"mt-5"}>
+                    <Col
+                        xs={{span: 12}}
+                        md={{span:10, offset: 1}}
+                        lg={{span:8, offset: 2}}
+                        xl={{span:6, offset: 3}}
+                    >
+                        <div className="d-flex justify-content-center align-items-center pt-5">
+                            <h4 className={'mb-0 me-4'}>Waiting for the owner to launch Spotify</h4>
+                            <Spinner animation={'border'} role={'status'} />
+                        </div>
+                    </Col>
+                </Row>
+                ) : null
+            }
 
             <Row className={"mt-4"}>
                 <Col
