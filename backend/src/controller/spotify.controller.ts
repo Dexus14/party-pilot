@@ -2,9 +2,11 @@ import express from "express";
 import {getRoomOwnerToken} from "../service/websocketUtils.service";
 import {searchSong} from "../service/spotifyApi.service";
 import {mapSongsData} from "../service/spotifyUtils.service";
+import {verifyJwtRoomUser} from "../service/auth.service";
 
 export async function getSpotifySearchSong(req: express.Request, res: express.Response) {
-    const roomId = req.cookies.roomUser.roomId // TODO: Add proper auth
+    const { roomId } = verifyJwtRoomUser(req.cookies.roomUser)
+
     if(!roomId) {
         return res.status(403).send('You are not in a room')
     }

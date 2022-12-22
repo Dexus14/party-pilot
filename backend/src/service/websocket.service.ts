@@ -11,7 +11,7 @@ import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDat
 import {addSongToQueue, nextSong, pauseSong, previousSong, resumeSong} from "./spotifyApi.service";
 import {
     socketConnectToRoom,
-    getRoomAndUserFromCookie,
+    getRoomAndUserFromWsHandshakeCookie,
     socketAuthMiddleware,
     socketRoomUpdate, updateRoomTrack, getRoomOwnerToken, handleSocketError, updateRoomQueue
 } from "./websocketUtils.service";
@@ -26,7 +26,7 @@ export function createWebsocketListeners(io: Server<
     io.use(socketAuthMiddleware)
 
     io.on('connection', async (socket) => {
-        const {roomId, userRoomId} = getRoomAndUserFromCookie(socket.handshake.headers.cookie ?? '')
+        const {roomId, userRoomId} = getRoomAndUserFromWsHandshakeCookie(socket.handshake.headers.cookie ?? '')
 
         try {
             socketConnectToRoom(socket, roomId)

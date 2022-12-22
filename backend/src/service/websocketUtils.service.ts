@@ -5,6 +5,8 @@ import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
 import {getUserBySpotifyId} from "./database.service";
 import {getPlaybackState} from "./spotifyApi.service";
+import jwt from 'jsonwebtoken'
+import {verifyJwtRoomUser} from "./auth.service";
 
 export function socketConnectToRoom(socket: Socket, roomId: string) {
     const roomExistsance = roomExists(roomId ?? '')
@@ -26,22 +28,29 @@ export async function socketRoomUpdate(socket: Server|Socket, roomId: string, em
     emitToSelf && socket.emit('roomUpdate', room)
 }
 
-export function getRoomAndUserFromCookie(cookieString: string) {
+export function getRoomAndUserFromWsHandshakeCookie(cookieString: string) {
     const cookies = cookieParser.JSONCookies(cookie.parse(cookieString))
-    // @ts-ignore
-    const roomId = cookies?.roomUser?.roomId
-    // @ts-ignore
-    const userRoomId = cookies?.roomUser?.id
+    const roomUserCookie = cookies?.roomUser as string|undefined
 
-    return {roomId, userRoomId}
+    if(!roomUserCookie) {
+        throw new Error('No roomUser cookie found.')
+    }
+
+    const userData = verifyJwtRoomUser(roomUserCookie)
+
+    return { roomId: userData.roomId, userRoomId: userData.id }
 }
 
 export function socketAuthMiddleware(socket: Socket, next: (err?: ExtendedError|undefined) => void) {
-    const {roomId, userRoomId} = getRoomAndUserFromCookie(socket.handshake.headers.cookie ?? '')
-    const roomAndUserExistance = roomAndUserExists(roomId, userRoomId)
+    try {
+        const {roomId, userRoomId} = getRoomAndUserFromWsHandshakeCookie(socket.handshake.headers.cookie ?? '')
+        const roomAndUserExistance = roomAndUserExists(roomId, userRoomId)
 
-    if(!roomAndUserExistance) {
-        return next(new Error('This room does not exist.'))
+        if(!roomAndUserExistance) {
+            return next(new Error('This room does not exist.'))
+        }
+    } catch(e) {
+        return next(new Error('Invalid cookie.'))
     }
 
     next()
