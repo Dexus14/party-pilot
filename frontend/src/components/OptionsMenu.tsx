@@ -4,16 +4,12 @@ import {Button, Col, Container, FloatingLabel, Form, ListGroup, Row} from "react
 
 
 export default function OptionsMenu({ socket, room, optionsStateUpdate }: { socket: Socket, room: any, optionsStateUpdate: any }) {
-    const [equality, setEquality] = useState(room.options.equality)
     const [roomName, setRoomName] = useState(room.options.name)
-    const [skipVotes, setSkipVotes] = useState(room.options.skipVotes)
     const [songsPerUser, setSongsPerUser] = useState(room.options.songsPerUser)
 
     async function saveOptions() {
         const options ={
-            equality,
             name: roomName,
-            skipVotes,
             songsPerUser
         }
 
@@ -43,36 +39,12 @@ export default function OptionsMenu({ socket, room, optionsStateUpdate }: { sock
                             </FloatingLabel>
 
                             <FloatingLabel
-                                controlId="skipVotes"
-                                label="Skip votes required"
-                                className="mb-3"
-                            >
-                                <Form.Control
-                                    type="number"
-                                    placeholder="Room name"
-                                    defaultValue={skipVotes}
-                                    onChange={(e) => setSkipVotes(e.target.value)}
-                                    disabled // TODO: Implement skip votes
-                                />
-
-                            </FloatingLabel>
-
-                            <FloatingLabel
                                 controlId="songsPerUser"
                                 label="Max songs per user"
                                 className="mb-3"
                             >
                                 <Form.Control type="number" placeholder="Songs per user" defaultValue={songsPerUser} onChange={(e) => setSongsPerUser(e.target.value)} />
                             </FloatingLabel>
-
-                            <Form.Check
-                                type="switch"
-                                id="equality-switch"
-                                disabled // TODO: Implement equality
-                                label="Equality"
-                                checked={equality}
-                                onChange={(e) => setEquality(e.target.checked)}
-                            />
 
                             <div className={"d-flex justify-content-start mt-4"}>
                                 <Button className={"me-2"} variant={'primary'} onClick={saveOptions}>Save</Button>
