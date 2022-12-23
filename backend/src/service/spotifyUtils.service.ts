@@ -1,8 +1,7 @@
 import querystring from "querystring";
 import {refreshToken, SPOTFIY_SCOPES, SPOTIFY_AUTH_API_URL} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
-import {Prisma} from "@prisma/client";
-import {updateUser} from "./database.service";
+import {updateRoomTokens} from "./rooms.service";
 
 export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
     return SPOTIFY_AUTH_API_URL + '?' +
@@ -15,9 +14,9 @@ export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
         })
 }
 
-export async function refreshTokenIfNeeded(user: Prisma.UserGetPayload<{}>) {
+export async function refreshTokenIfNeeded(room: Room) {
     const now = new Date()
-    const lastRefresh = new Date(user.lastRefresh)
+    const lastRefresh = new Date(room.lastRefresh)
     const diff = now.getTime() - lastRefresh.getTime()
     if(!process.env.SPOTIFY_TOKEN_LIFETIME_MILLIS) {
         throw new Error('SPOTIFY_TOKEN_LIFETIME_MILLIS is not set')
@@ -25,19 +24,16 @@ export async function refreshTokenIfNeeded(user: Prisma.UserGetPayload<{}>) {
     const tokenLifetime = parseInt(process.env.SPOTIFY_TOKEN_LIFETIME_MILLIS)
 
     if(diff > tokenLifetime) {
-        const result = await refreshToken(user.refreshToken)
+        const result = await refreshToken(room.refreshToken)
         const newAccessToken = result.access_token
         const newRefreshToken = result.refresh_token
-        const updatedUser = await updateUser({
-            spotifyId: user.spotifyId,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-        })
 
-        return updatedUser.accessToken
+        const updatedRoom = updateRoomTokens(room.id, newAccessToken, newRefreshToken)
+
+        return updatedRoom.accessToken
     }
 
-    return user.accessToken
+    return room.accessToken
 }
 
 

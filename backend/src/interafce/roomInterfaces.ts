@@ -12,6 +12,9 @@ interface Room {
     ownerSpotifyId: string
     users: RoomUser[]
     options: RoomOptions
+    accessToken: string
+    refreshToken: string
+    lastRefresh: number
 }
 
 interface RoomPlaybackStateData {

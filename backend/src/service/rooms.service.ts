@@ -1,10 +1,8 @@
 import NodeCache from "node-cache";
-import {createUser, getUserBySpotifyId, updateUser} from "./database.service";
 import {getQueue, getSpotifyUserData} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
 import {Server} from "socket.io";
 import {getRoomOwnerToken, updateRoomQueue, updateRoomTrack} from "./websocketUtils.service";
-import {Prisma} from '@prisma/client'
 import {refreshTokenIfNeeded} from "./spotifyUtils.service";
 
 const roomsCache = new NodeCache() // TODO: Add TTL
@@ -38,24 +36,12 @@ export async function createOrGetRoom(authData: any, ownerSpotifyId: string): Pr
     const spotifyOwnerData = await getSpotifyUserData(authData.access_token)
 
     const ownerId = spotifyOwnerData.data.id
-    let user = await getUserBySpotifyId(ownerId)
 
-    if(user !== null && roomExists(user.roomId)) {
-        return user.roomId
+    if(roomOwnerExists(ownerId)) {
+        return getRoomOwnersRoomId(ownerSpotifyId) as string
     }
 
     let roomId = generateRoomId()
-
-    const newUserData: Prisma.UserCreateInput = {
-        spotifyId: ownerId,
-        roomId,
-        accessToken: authData.access_token,
-        refreshToken: authData.refresh_token,
-        lastRefresh: new Date()
-    }
-
-    // Create or update user
-    user === null ? await createUser(newUserData) : await updateUser(newUserData)
 
     const room: Room = {
         id: roomId,
@@ -66,7 +52,10 @@ export async function createOrGetRoom(authData: any, ownerSpotifyId: string): Pr
             songsPerUser: 0,
             equality: false,
             skipVotes: 0
-        }
+        },
+        accessToken: authData.access_token,
+        refreshToken: authData.refresh_token,
+        lastRefresh: Date.now()
     }
 
     setRoom(room)
@@ -247,17 +236,7 @@ export async function refreshRoomOwnerTokenIfNeeded(roomId: string) {
         throw new Error('Room does not exist')
     }
 
-    const roomOwner = room.ownerSpotifyId
-    if(!roomOwner) {
-        throw new Error('Room owner does not exist')
-    }
-
-    const user = await getUserBySpotifyId(roomOwner)
-    if(!user) {
-        throw new Error('User does not exist')
-    }
-
-    return refreshTokenIfNeeded(user)
+    return refreshTokenIfNeeded(room)
 }
 
 export async function updateRoomOptions(roomId: string, options: RoomOptions) {
@@ -280,6 +259,27 @@ export function destroyRoomByOwnerId(ownerSpotifyId: string) {
 
     roomsCache.del(roomId)
     roomOwnersCache.del(ownerSpotifyId)
+}
+
+export function getRoomOwnersRoomId(ownerSpotifyId: string) {
+    return roomOwnersCache.get(ownerSpotifyId) as string|undefined
+}
+
+export function roomOwnerExists(ownerSpotifyId: string) {
+    return roomOwnersCache.has(ownerSpotifyId)
+}
+
+export function updateRoomTokens(roomId: string, accessToken: string, refreshToken: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    room.accessToken = accessToken
+    room.refreshToken = refreshToken
+    room.lastRefresh = Date.now()
+    setRoom(room)
+    return room
 }
 
 function generateRoomId() {

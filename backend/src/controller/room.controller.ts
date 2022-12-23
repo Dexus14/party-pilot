@@ -9,7 +9,6 @@ import {
 } from "../service/rooms.service";
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
-import jwt from "jsonwebtoken";
 import {encodeAuthData, verifyJwtRoomUser} from "../service/auth.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
@@ -66,21 +65,21 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
     }
 
     // If user is already in room, remove him from old room
-    const roomUserData = verifyJwtRoomUser(req.cookies.roomUser)
-    if(roomUserData !== undefined && roomUserData.roomId !== roomId) {
-        removeRoomUser(roomUserData.roomId, roomUserData.id)
+    if(req.cookies.roomUser !== undefined) {
+        const roomUserData = verifyJwtRoomUser(req.cookies.roomUser)
+        if(roomUserData.roomId !== roomId) {
+            removeRoomUser(roomUserData.roomId, roomUserData.id)
+        } else {
+            return res.redirect(process.env.APP_URL ?? '')
+        }
     }
 
     // Do nothing if he already is in the room
-    if(roomUserData === undefined || roomUserData.roomId !== roomId) {
-        const roomUser = createRoomUser(roomId, username)
+    const roomUser = createRoomUser(roomId, username)
 
-        return res.cookie('roomUser', encodeAuthData(roomUser), {
-            maxAge: 1000 * 60 * 60 * 24 // 1 day
-        }).redirect(process.env.APP_URL ?? '')
-    }
-
-    res.redirect(process.env.APP_URL ?? '')
+    return res.cookie('roomUser', encodeAuthData(roomUser), {
+        maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }).redirect(process.env.APP_URL ?? '')
 }
 
 // TODO: In the future consider adding a way to remove room by user email

@@ -3,9 +3,7 @@ import {getQueueWithRoomUsers, getRoom, roomAndUserExists, roomExists} from "./r
 import cookieParser from "cookie-parser";
 import cookie from 'cookie'
 import {ExtendedError} from "socket.io/dist/namespace";
-import {getUserBySpotifyId} from "./database.service";
 import {getPlaybackState} from "./spotifyApi.service";
-import jwt from 'jsonwebtoken'
 import {verifyJwtRoomUser} from "./auth.service";
 
 export function socketConnectToRoom(socket: Socket, roomId: string) {
@@ -85,12 +83,7 @@ export async function getRoomOwnerToken(roomId: string) {
         throw new Error('Room does not exist')
     }
 
-    const user = await getUserBySpotifyId(room.ownerSpotifyId)
-    if (!user) {
-        throw new Error('User does not exist')
-    }
-
-    return user.accessToken
+    return room.accessToken
 }
 
 export async function updateRoomQueue(roomId: string, socket: Server|Socket) {
