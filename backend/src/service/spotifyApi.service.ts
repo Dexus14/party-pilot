@@ -75,7 +75,7 @@ export function searchSong(accessToken: string, query: string) {
     return makeGetRequest('/search', accessToken, {
         q: query,
         type: 'track',
-        limit: 3
+        limit: 10
     })
 }
 
