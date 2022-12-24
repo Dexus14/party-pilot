@@ -1,0 +1,98 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  /* Prevents player from covering last elements of app body */
+  padding-bottom: calc(10vh + 30px);
+}
+
+.room-name {
+  font-size: 2rem;
+  text-align: center;
+}
+
+.room-code {
+  font-size: 1rem;
+  text-align: center;
+}
+
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+
+.avatar-xs {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+
+/* PLAYER */
+.music-player {
+  background-color: var(--bs-body-bg);
+
+  width: 100vw;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 10vh;
+  border-top: 2px solid #282c34;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+.player-button {
+  height: 70%;
+  aspect-ratio: 1 / 1;
+  background-color: black;
+  color: white;
+  margin: 10px;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-color-scheme: dark) {
+
+}
+
+.searching {
+  position: fixed;
+  top: 20px;
+}
+
+.searched-song {
+  cursor: pointer;
+}
+
+.currently-playing-album-image {
+  max-height: 100%;
+  object-fit: contain;
+  max-width: 40%;
+  border-radius: 5px;
+}
+
+.search-album-image {
+  min-width: 10vh;
+  max-width: 10vw;
+  border-radius: 5px;
+}

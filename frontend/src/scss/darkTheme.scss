@@ -1,0 +1,11 @@
+@import 'bootstrap-dark-5/dist/css/bootstrap-night.min.css';
+@import './styles.scss';
+
+.music-player {
+  border-top: 2px solid white;
+}
+
+.player-button {
+  background-color: white;
+  color: black;
+}

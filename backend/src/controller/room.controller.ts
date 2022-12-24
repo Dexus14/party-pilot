@@ -1,30 +1,49 @@
-import {auth} from "../service/spotify.service";
-import {createOrGetRoom, getRoom, setRoom} from "../service/rooms.service";
+import {authSpotify, getSpotifyUserData} from "../service/spotifyApi.service";
+import {
+    createOrGetRoom,
+    createRoomUser, destroyRoomByOwnerId,
+    getRoomOwner,
+    removeRoomUser,
+    roomAndUserExists,
+    roomExists
+} from "../service/rooms.service";
 import express from "express";
-import querystring from "querystring";
-import {randomString} from "../service/utils.service";
+import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
+import {encodeAuthData, verifyJwtRoomUser} from "../service/auth.service";
 
-export async function roomCreate(req: express.Request, res: express.Response) {
-    const ownerData = await auth(req)
+export async function roomCreateGet(req: express.Request, res: express.Response) {
+    try {
+        const authData = await authSpotify(req)
+        const ownerData = await getSpotifyUserData(authData.access_token)
 
-    const roomId = await createOrGetRoom(ownerData)
-    const room = await getRoom(roomId)
+        const roomId = await createOrGetRoom(authData, ownerData.data.id)
 
-    res
-        .redirect(`/room/join/${roomId}`)
+        // TODO: maybe generate random username?
+        const roomUserData = req.cookies.roomUser
+        if (roomUserData && roomAndUserExists(roomId, roomUserData.id)) {
+            return res.redirect(process.env.APP_URL ?? '')
+        }
+
+        let roomUser = getRoomOwner(roomId)
+        if(!roomUser) {
+            roomUser = createRoomUser(roomId, 'owner', true)
+        }
+
+        return res.cookie('roomUser', encodeAuthData(roomUser), {
+            maxAge: 1000 * 60 * 60 * 24 // 1 day
+        }).redirect(process.env.APP_URL ?? '')
+    } catch (e) {
+        res.status(500).send('Error while creating room') // TODO: add error site
+    }
 }
 
-export async function roomAuth(req: express.Request, res: express.Response) {
-    // TODO: Checkout the parameters etc
-    const url = 'https://accounts.spotify.com/authorize?' +
-        querystring.stringify({
-            response_type: 'code',
-            client_id: '2ca454e3515b49328830ec5a9b2fd8b6',
-            scope: 'user-read-private user-read-email',
-            redirect_uri: 'http://localhost:3002/room/create',
-            state: randomString(16) // FIXME: How to use this state properly?
-        })
-    console.log(url)
+export async function roomAuthGet(req: express.Request, res: express.Response) {
+    if(req?.query?.destroy === '1') {
+        const url = getSpotifyAuthLink(true)
+        return res.redirect(url)
+    }
+
+    const url = getSpotifyAuthLink()
     res.redirect(url)
 }
 
@@ -35,43 +54,44 @@ export async function roomJoinGet(req: express.Request, res: express.Response) {
 }
 
 export async function roomJoinPost(req: express.Request, res: express.Response) {
-    const roomId = req?.body?.roomId as string
-    const name = req?.body?.username as string
-
-    const room = await getRoom(roomId)
-
-    console.log(room)
-    console.log(roomId)
-    console.log(name)
-
-    if(!room || !name) {
-        return res.redirect('/room/join/' + roomId)
+    const {roomId, username} = req.body
+    if(!roomId || !username) {
+        return res.redirect('/room/join?error=missingParameters')
     }
 
-    const roomUserData = req.cookies.roomUser
-
-    if(!roomUserData || roomUserData.roomId !== roomId) {
-        room.users.push({
-            id: randomString(4),
-            name,
-            roomId
-        })
-
-        setRoom(roomId, room)
-
-        res.cookie('roomUser', room.users[room.users.length - 1])
+    const roomExistance = roomExists(roomId)
+    if(!roomExistance) {
+        return res.redirect('/room/join?error=roomDoesNotExist')
     }
 
-    res.redirect('http://localhost:3000')
+    // If user is already in room, remove him from old room
+    if(req.cookies.roomUser !== undefined) {
+        const roomUserData = verifyJwtRoomUser(req.cookies.roomUser)
+        if(roomUserData.roomId !== roomId) {
+            removeRoomUser(roomUserData.roomId, roomUserData.id)
+        } else {
+            return res.redirect(process.env.APP_URL ?? '')
+        }
+    }
+
+    // Do nothing if he already is in the room
+    const roomUser = createRoomUser(roomId, username)
+
+    return res.cookie('roomUser', encodeAuthData(roomUser), {
+        maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }).redirect(process.env.APP_URL ?? '')
 }
 
-export async function room(req: express.Request, res: express.Response) {
-    const roomId = req.params.roomId
-    const room = await getRoom(roomId)
+// TODO: In the future consider adding a way to remove room by user email
+export async function destroyRoomGet(req: express.Request, res: express.Response) {
+    try {
+        const authData = await authSpotify(req, true)
+        const ownerData = await getSpotifyUserData(authData.access_token)
 
-    if(!room) {
-        return res.send('no such room!')
+        destroyRoomByOwnerId(ownerData.data.id)
+
+        res.redirect('/?success=roomDestroyed')
+    } catch (e) {
+        return res.redirect('/?error=errorDestroying')
     }
-
-    res.send(room)
 }

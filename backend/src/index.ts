@@ -1,93 +1,73 @@
 import {Server} from "socket.io";
 import express from 'express'
-import cors from 'cors'
-import {getRoom, roomExists} from "./service/rooms.service";
 import cookieParser from "cookie-parser";
-import roomRoutes from "./routes/roomRoutes";
+import roomRoutes from "./routes/room.routes";
+import * as path from "path";
+import morgan from 'morgan'
+import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./interafce/socketInterfaces";
+import {createWebsocketListeners} from "./service/websocket.service";
+import {updateRoomTracksIntervally} from "./service/rooms.service";
+import spotifyRoutes from "./routes/spotify.routes";
 require('dotenv').config()
+
+if(!process.env.APP_URL) {
+    throw new Error('APP_URL is not defined')
+}
+
+// EXPRESS server setup -------------------------------------------------------------------------------------------
 
 export const app = express()
 
 app.set('view engine', 'ejs');
-app.set('views', '/home/adaml/Documents/noldjs/partify/backend/src/views'); // TODO: Add concat with path
-app.use(cors({
-    origin: 'http://localhost:3000'
-}))
+app.set('views', path.join(__dirname, '../src/views'));
 app.use(cookieParser())
 app.use(express.urlencoded({
     extended: true
 }))
+// Logging middleware
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
-app.listen(3002, () => {
-    console.log('listening')
+app.listen(process.env.APP_PORT, () => {
+    console.log('Started listening on port ' + process.env.APP_PORT)
+})
+
+app.get('/', (req, res) => {
+    res.render('main')
 })
 
 app.use('/room', roomRoutes)
+app.use('/api/spotify', spotifyRoutes)
 
-app.get('/', (req, res) => {
-    res.render('index')
+// Path for static files required by React app
+app.use(express.static(path.join(__dirname, '../../frontend/build')))
+// Public path
+app.use(express.static(path.join(__dirname, '../src/views/public')))
+
+app.get('/app', async (req, res) => {
+    process.env.APP_ENV === 'dev' ?
+        res.redirect(process.env.APP_URL ?? '') :
+        res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
+// Unknown request handler
 app.use((req, res) => {
     res.send('404');
 });
 
-// SOCKET --------------------------------------------------------------------------------------------
+// WEBSOCKET server setup --------------------------------------------------------------------------------------------
 
-interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
-    roomUpdate: (room: any) => void;
-}
-
-interface ClientToServerEvents {
-    roomJoin: (message: string, roomId: string) => void;
-}
-
-interface InterServerEvents {
-    ping: (room: any) => void;
-}
-
-interface SocketData {
-    message: string;
-    roomId: string;
-}
-
-const io = new Server<
+export const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
     SocketData
     >(8000, {
-        cors: {
-            origin: ['http://localhost:3000']
-        }
+    cors: {
+        origin: [process.env.APP_URL],
+        credentials: true
+    },
+    cookie: true
 })
 
-io.use((socket, next) => {
-    const roomExistsStatus = roomExists(socket.data.roomId ?? '')
-
-    if(!roomExistsStatus) {
-        return next(new Error('This room does not exist.'))
-    }
-
-    next()
-})
-
-io.on('connection', (socket) => {
-    console.log('connected')
-
-    socket.on('roomJoin', (message, roomId) => {
-        socket.join(roomId)
-
-        socket.to(socket.id)
-        socket.to(socket.data.roomId ?? '').emit('roomUpdate', socketRoomUpdate(roomId))
-    })
-
-})
-
-function socketRoomUpdate(roomId: string) {
-    const room = getRoom(roomId)
-    io.to(roomId).emit('roomUpdate', room)
-}
+createWebsocketListeners(io)
+updateRoomTracksIntervally(io)
