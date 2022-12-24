@@ -213,7 +213,7 @@ export function canUserAddSong(roomId: string, roomUserId: string) {
         throw new Error('Room user does not exist')
     }
 
-    if(room.options.songsPerUser === 0) {
+    if(!room.options.songsPerUser || room.options.songsPerUser === 0) {
         return true
     }
 
