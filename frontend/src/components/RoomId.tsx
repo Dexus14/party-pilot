@@ -1,6 +1,8 @@
 import {Overlay, Placeholder, Tooltip} from "react-bootstrap";
 import React, {useEffect, useRef, useState} from "react";
 
+const APP_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_APP_URL as string : process.env.RENDER_EXTERNAL_URL as string
+
 export function RoomId({ room }: { room: any }) {
     const [copyingState, setCopyingState] = useState<string|null>(null)
     const target = useRef(null)
@@ -10,7 +12,7 @@ export function RoomId({ room }: { room: any }) {
         if(!navigator.clipboard) {
             return setCopyingState('failed')
         }
-        const joinLink = process.env.REACT_APP_SERVER_URL + '/room/join/' + room?.id
+        const joinLink = APP_URL + '/room/join'
         await navigator.clipboard.writeText(joinLink)
         setCopyingState('success')
     }

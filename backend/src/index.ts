@@ -10,9 +10,18 @@ import {updateRoomTracksIntervally} from "./service/rooms.service";
 import spotifyRoutes from "./routes/spotify.routes";
 require('dotenv').config()
 
-if(!process.env.APP_URL) {
+if(process.env.APP_ENV === 'dev' && !process.env.APP_URL) {
     throw new Error('APP_URL is not defined')
 }
+
+export const APP_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL + '/app' as string
+
+if(!APP_URL) {
+    throw new Error('APP_URL is not defined')
+}
+
+export const SPOTIFY_AUTH_REDIRECT_URL = APP_URL + '/room/create'
+export const SPOTIFY_DESTROY_REDIRECT_URL = APP_URL + '/room/destroy'
 
 // EXPRESS server setup -------------------------------------------------------------------------------------------
 
@@ -27,8 +36,8 @@ app.use(express.urlencoded({
 // Logging middleware
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
-app.listen(process.env.APP_PORT, () => {
-    console.log('Started listening on port ' + process.env.APP_PORT)
+app.listen(process.env.PORT, () => {
+    console.log('Started listening on port ' + process.env.PORT)
 })
 
 app.get('/', (req, res) => {
@@ -45,7 +54,7 @@ app.use(express.static(path.join(__dirname, '../src/views/public')))
 
 app.get('/app', async (req, res) => {
     process.env.APP_ENV === 'dev' ?
-        res.redirect(process.env.APP_URL ?? '') :
+        res.redirect(APP_URL ?? '') :
         res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
@@ -63,7 +72,7 @@ export const io = new Server<
     SocketData
     >(8000, {
     cors: {
-        origin: [process.env.APP_URL],
+        origin: [APP_URL],
         credentials: true
     },
     cookie: true

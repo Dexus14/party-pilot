@@ -2,6 +2,7 @@ import querystring from "querystring";
 import {refreshToken, SPOTFIY_SCOPES, SPOTIFY_AUTH_API_URL} from "./spotifyApi.service";
 import {randomString} from "./utils.service";
 import {updateRoomTokens} from "./rooms.service";
+import {SPOTIFY_AUTH_REDIRECT_URL, SPOTIFY_DESTROY_REDIRECT_URL} from "../index";
 
 export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
     return SPOTIFY_AUTH_API_URL + '?' +
@@ -9,7 +10,7 @@ export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
             response_type: 'code',
             client_id: process.env.SPOTIFY_CLIENT_ID,
             scope: SPOTFIY_SCOPES,
-            redirect_uri: redirectToDestroy ? process.env.SPOTIFY_DESTROY_REDIRECT_URL : process.env.SPOTIFY_AUTH_REDIRECT_URL,
+            redirect_uri: redirectToDestroy ? SPOTIFY_DESTROY_REDIRECT_URL : SPOTIFY_AUTH_REDIRECT_URL,
             state: randomString(16) // FIXME: How to use this state properly?
         })
 }
