@@ -10,6 +10,7 @@ import {
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 import {encodeAuthData, verifyJwtRoomUser} from "../service/auth.service";
+import {APP_URL} from "../index";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
     try {
@@ -21,7 +22,7 @@ export async function roomCreateGet(req: express.Request, res: express.Response)
         // TODO: maybe generate random username?
         const roomUserData = req.cookies.roomUser
         if (roomUserData && roomAndUserExists(roomId, roomUserData.id)) {
-            return res.redirect(process.env.APP_URL ?? '')
+            return res.redirect(APP_URL)
         }
 
         let roomUser = getRoomOwner(roomId)
@@ -31,7 +32,7 @@ export async function roomCreateGet(req: express.Request, res: express.Response)
 
         return res.cookie('roomUser', encodeAuthData(roomUser), {
             maxAge: 1000 * 60 * 60 * 24 // 1 day
-        }).redirect(process.env.APP_URL ?? '')
+        }).redirect(APP_URL)
     } catch (e) {
         res.status(500).send('Error while creating room') // TODO: add error site
     }
@@ -70,7 +71,7 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
         if(roomUserData.roomId !== roomId) {
             removeRoomUser(roomUserData.roomId, roomUserData.id)
         } else {
-            return res.redirect(process.env.APP_URL ?? '')
+            return res.redirect(APP_URL)
         }
     }
 
@@ -79,7 +80,7 @@ export async function roomJoinPost(req: express.Request, res: express.Response) 
 
     return res.cookie('roomUser', encodeAuthData(roomUser), {
         maxAge: 1000 * 60 * 60 * 24 // 1 day
-    }).redirect(process.env.APP_URL ?? '')
+    }).redirect(APP_URL)
 }
 
 // TODO: In the future consider adding a way to remove room by user email

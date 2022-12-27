@@ -2,6 +2,7 @@ import {Request} from "express";
 import axios from "axios";
 import {encodeFormData} from "./utils.service";
 import {getSpotifyAuthString} from "./spotifyUtils.service";
+import {SPOTIFY_AUTH_REDIRECT_URL, SPOTIFY_DESTROY_REDIRECT_URL} from "../index";
 
 export const SPOTFIY_SCOPES = 'user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing'
 export const SPOTIFY_AUTH_API_URL = 'https://accounts.spotify.com/authorize'
@@ -15,7 +16,7 @@ export async function authSpotify(req: Request, redirectToDestroy: boolean = fal
 
     const parsedFormData = encodeFormData({
         code,
-        redirect_uri: redirectToDestroy ? process.env.SPOTIFY_DESTROY_REDIRECT_URL : process.env.SPOTIFY_AUTH_REDIRECT_URL,
+        redirect_uri: redirectToDestroy ? SPOTIFY_DESTROY_REDIRECT_URL : SPOTIFY_AUTH_REDIRECT_URL,
         grant_type: 'authorization_code'
     })
 
