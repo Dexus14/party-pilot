@@ -15,13 +15,14 @@ if(process.env.APP_ENV === 'dev' && !process.env.APP_URL) {
 }
 
 export const APP_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL + '/app' as string
+export const SERVER_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL as string
 
 if(!APP_URL) {
     throw new Error('APP_URL is not defined')
 }
 
-export const SPOTIFY_AUTH_REDIRECT_URL = APP_URL + '/room/create'
-export const SPOTIFY_DESTROY_REDIRECT_URL = APP_URL + '/room/destroy'
+export const SPOTIFY_AUTH_REDIRECT_URL = SERVER_URL + '/room/create'
+export const SPOTIFY_DESTROY_REDIRECT_URL = SERVER_URL + '/room/destroy'
 
 // EXPRESS server setup -------------------------------------------------------------------------------------------
 
