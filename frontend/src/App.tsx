@@ -13,7 +13,7 @@ import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
 import {RoomId} from "./components/RoomId";
 
-const WEBSOCKET_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_WEBSOCKET_URL : 'ws://'+window.location.host+'8000'
+const WEBSOCKET_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_WEBSOCKET_URL : 'ws://'+window.location.host+':8000'
 
 const socket = io(WEBSOCKET_URL ?? '', {
     withCredentials: true
