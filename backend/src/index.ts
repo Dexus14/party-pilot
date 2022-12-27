@@ -37,10 +37,6 @@ app.use(express.urlencoded({
 // Logging middleware
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
-app.listen(process.env.PORT, () => {
-    console.log('Started listening on port ' + process.env.PORT)
-})
-
 app.get('/', (req, res) => {
     res.render('main')
 })
@@ -68,18 +64,20 @@ app.use((req, res) => {
 
 // WEBSOCKET server setup --------------------------------------------------------------------------------------------
 
+const server = require('http').createServer(app);
 export const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
     SocketData
-    >(8000, {
+    >(server, {
     cors: {
         origin: [APP_URL],
         credentials: true
     },
     cookie: true
 })
+server.listen(process.env.PORT, () => console.log('Started listening on port: ' + process.env.PORT))
 
 createWebsocketListeners(io)
 updateRoomTracksIntervally(io)
