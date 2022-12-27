@@ -44,6 +44,8 @@ app.get('/', (req, res) => {
     res.render('main')
 })
 
+app.get('/health', (req, res) => res.send(200))
+
 app.use('/room', roomRoutes)
 app.use('/api/spotify', spotifyRoutes)
 
