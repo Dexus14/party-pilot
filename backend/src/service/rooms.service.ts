@@ -4,15 +4,23 @@ import {randomString} from "./utils.service";
 import {Server} from "socket.io";
 import {getRoomOwnerToken, updateRoomQueue, updateRoomTrack} from "./websocketUtils.service";
 import {refreshTokenIfNeeded} from "./spotifyUtils.service";
+import {ROOM_LIFETIME} from "../index";
 
-const roomsCache = new NodeCache() // TODO: Add TTL
+const roomsCache = new NodeCache()
+
+// This cache is used to remove the room from the rooms cache when the owner requests it
 const roomOwnersCache = new NodeCache()
 
 const roomsToUpdate = new Set<string>()
 
+// Remove owner of the room from owners cache on room expiry / deletion
+roomsCache.on('del', (key, value: Room) => roomOwnersCache.del(value.ownerSpotifyId))
+
 export function updateRoomTracksIntervally(io: Server) {
     setInterval(async () => {
         for(const roomId of roomsToUpdate) {
+            removeRoomIfExpired(roomId)
+
             const roomExistance = roomExists(roomId)
             if(!roomExistance) {
                 roomsToUpdate.delete(roomId)
@@ -55,7 +63,8 @@ export async function createOrGetRoom(authData: any, ownerSpotifyId: string): Pr
         },
         accessToken: authData.access_token,
         refreshToken: authData.refresh_token,
-        lastRefresh: Date.now()
+        lastRefresh: Date.now(),
+        createdAt: Date.now()
     }
 
     setRoom(room)
@@ -258,7 +267,6 @@ export function destroyRoomByOwnerId(ownerSpotifyId: string) {
     }
 
     roomsCache.del(roomId)
-    roomOwnersCache.del(ownerSpotifyId)
 }
 
 export function getRoomOwnersRoomId(ownerSpotifyId: string) {
@@ -290,4 +298,15 @@ function generateRoomId() {
     }
 
     return roomId
+}
+
+function removeRoomIfExpired(roomId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    if(room.createdAt + ROOM_LIFETIME < Date.now()) {
+        roomsCache.del(roomId)
+    }
 }

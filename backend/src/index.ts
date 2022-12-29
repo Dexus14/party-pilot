@@ -18,6 +18,11 @@ if(!APP_URL) {
     throw new Error('APP_URL is not defined')
 }
 
+if(!process.env.ROOM_LIFETIME_MS) {
+    throw new Error('ROOM_LIFETIME_MS env variable is not set.')
+}
+export const ROOM_LIFETIME = parseInt(process.env.ROOM_LIFETIME_MS)
+
 export const SPOTIFY_AUTH_REDIRECT_URL = SERVER_URL + '/room/create'
 export const SPOTIFY_DESTROY_REDIRECT_URL = SERVER_URL + '/room/destroy'
 
