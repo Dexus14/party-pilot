@@ -6,6 +6,12 @@
     <h1 style="position: fixed; left: 0; top: 15vh; font-size: 3rem; text-align: center; width: 100%">Party pilot <i class="bi bi-speaker"></i></h1>
 
     <div style="height: 100%;" class="d-flex flex-column align-items-center justify-content-center">
+        <% if (error !== '') { %>
+        <div style="width: 80%;" class="alert alert-danger" role="alert">
+            <%= error %>
+        </div>
+        <% } %>
+
         <form style="width: 80%" method="post">
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" id="username" placeholder="Username" name="username">

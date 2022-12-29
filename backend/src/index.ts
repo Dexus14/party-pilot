@@ -8,10 +8,11 @@ import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDat
 import {createWebsocketListeners} from "./service/websocket.service";
 import {updateRoomTracksIntervally} from "./service/rooms.service";
 import spotifyRoutes from "./routes/spotify.routes";
+import {getMainErrorMessage, getMainSuccessMessage} from "./service/utils.service";
 require('dotenv').config()
 
 export const APP_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL + '/app' as string
-export const SERVER_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL as string
+export const SERVER_URL = process.env.APP_ENV === 'dev' ? process.env.SERVER_DEV_URL as string : process.env.RENDER_EXTERNAL_URL as string
 
 if(!APP_URL) {
     throw new Error('APP_URL is not defined')
@@ -34,7 +35,18 @@ app.use(express.urlencoded({
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
 app.get('/', (req, res) => {
-    res.render('main')
+    let success = req.query.success ?? ''
+    let error = req.query.error ?? ''
+
+    if(success && typeof success === 'string') {
+        success = getMainSuccessMessage(success)
+    }
+
+    if(error && typeof error === 'string') {
+        error = getMainErrorMessage(error)
+    }
+
+    res.render('main', { success, error })
 })
 
 app.get('/health', (req, res) => res.send(200))
