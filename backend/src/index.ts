@@ -10,10 +10,6 @@ import {updateRoomTracksIntervally} from "./service/rooms.service";
 import spotifyRoutes from "./routes/spotify.routes";
 require('dotenv').config()
 
-if(process.env.APP_ENV === 'dev' && !process.env.APP_URL) {
-    throw new Error('APP_URL is not defined')
-}
-
 export const APP_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL + '/app' as string
 export const SERVER_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL as string
 
