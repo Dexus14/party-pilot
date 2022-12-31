@@ -11,6 +11,7 @@ import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 import {encodeAuthData, verifyJwtRoomUser} from "../service/auth.service";
 import {APP_URL} from "../index";
+import {getRoomJoinErorrMessage} from "../service/utils.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
     try {
@@ -50,8 +51,12 @@ export async function roomAuthGet(req: express.Request, res: express.Response) {
 
 export async function roomJoinGet(req: express.Request, res: express.Response) {
     const roomId = req?.params?.roomId ?? ''
+    let error = req?.query?.error ?? ''
+    if(error !== ''  && typeof error === 'string') {
+        error = getRoomJoinErorrMessage(error)
+    }
 
-    res.render('roomJoin', { roomId })
+    res.render('roomJoin', { roomId, error })
 }
 
 export async function roomJoinPost(req: express.Request, res: express.Response) {

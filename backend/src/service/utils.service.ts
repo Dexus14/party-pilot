@@ -13,3 +13,32 @@ export function encodeFormData(data: any) {
         .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
         .join('&');
 }
+
+export function getRoomJoinErorrMessage(error: string) {
+    switch (error) {
+        case 'missingParameters':
+            return 'Missing parameters - please fill out both fields'
+        case 'roomDoesNotExist':
+            return 'This room does not exist'
+        default:
+            return 'Unknown error'
+    }
+}
+
+export function getMainSuccessMessage(success: string) {
+    switch (success) {
+        case 'roomDestroyed':
+            return 'Room destroyed successfully'
+        default:
+            return 'Unknown success'
+    }
+}
+
+export function getMainErrorMessage(error: string) {
+    switch (error) {
+        case 'errorDestroying':
+            return 'An unknown error occured while trying to destroy room'
+        default:
+            return 'Unknown error'
+    }
+}

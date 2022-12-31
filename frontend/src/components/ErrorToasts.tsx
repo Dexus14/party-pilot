@@ -2,7 +2,7 @@ import {Toast, ToastContainer} from "react-bootstrap";
 
 export default function ErrorToasts({ errors, removeError }: { errors: string[], removeError: any }) {
     return (
-        <ToastContainer>
+        <ToastContainer style={{ position: 'fixed', zIndex: 9999 }}>
             {
                 errors.map((error, index) => {
                     return (

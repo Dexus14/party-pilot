@@ -36,7 +36,7 @@ export function createWebsocketListeners(io: Server<
             await updateRoomQueue(roomId, socket)
         } catch(e) {
             if(e instanceof Error) {
-                handleSocketError(socket, e, false, true)
+                handleSocketError(socket, e, false)
             } else {
                 throw new Error('socketConnection: Unknown error')
             }

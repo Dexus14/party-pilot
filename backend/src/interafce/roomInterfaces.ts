@@ -15,6 +15,7 @@ interface Room {
     accessToken: string
     refreshToken: string
     lastRefresh: number
+    createdAt: number
 }
 
 interface RoomPlaybackStateData {
