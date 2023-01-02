@@ -13,6 +13,7 @@ import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
 import {RoomId} from "./components/RoomId";
 import RoomDestroyed from "./components/RoomDestroyed";
+import {RoomQr} from "./components/RoomQr";
 
 const WEBSOCKET_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_WEBSOCKET_URL : window.location.protocol + '//' + window.location.host
 
@@ -31,6 +32,7 @@ function App() {
     const [errors, setErrors] = useState<string[]>([])
     const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('TYPE_OF_THEME') || 'dark')
     const [roomDestroyed, setRoomDestroyed] = useState(false)
+    const [inQrView, setInQrView] = useState(false)
 
     function removeError(index: number) {
         setErrors(errors => errors.filter((_, i) => i !== index))
@@ -68,6 +70,10 @@ function App() {
 
     if(!isAuthorized) {
         return <Unauthorized />
+    }
+
+    if(inQrView) {
+        return <RoomQr room={room} qrViewUpdate={setInQrView} />
     }
 
     if(isSearching) {
@@ -121,7 +127,7 @@ function App() {
                     lg={{span:8, offset: 2}}
                     xl={{span:6, offset: 3}}
                 >
-                    <RoomId room={room} />
+                    <RoomId room={room} qrViewUpdate={setInQrView} />
 
                     <div className={'d-flex justify-content-center align-items-center'}>
                         <Button className={'me-5'} variant={"primary"} onClick={() => setInOptions(true)}>
