@@ -20,7 +20,7 @@ export default function Unauthorized() {
                             fontSize: '15vw'
                         }} className="bi bi-emoji-frown"></i>
 
-                        <a href={process.env.REACT_APP_SERVER_URL}>
+                        <a href={window.location.origin}>
                             <button className={'btn btn-lg btn-primary'}>Go to homepage</button>
                         </a>
                     </div>
