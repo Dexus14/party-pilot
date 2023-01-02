@@ -19,7 +19,10 @@ export default function CurrentlyPlaying({ track }: { track: any }) {
 
         if(track.is_playing) {
             const interval = setInterval(() => {
-                setAssumedProgress((last) => last + 1000)
+                setAssumedProgress((last) => {
+                    if(last + 1000 >= track.duration_ms) return last
+                    return last + 1000
+                })
             }, 1000)
 
             return () => {
