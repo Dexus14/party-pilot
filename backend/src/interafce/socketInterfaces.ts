@@ -4,6 +4,7 @@ export interface ServerToClientEvents {
     trackUpdate: (trackData: any) => void; // TODO: Add types here
     roomQueueUpdate: (queue: any) => void; // TODO: Add types here
     overSongLimit: () => void;
+    roomDestroyed: () => void;
     error: (message: string) => void;
 }
 
@@ -14,6 +15,7 @@ export interface ClientToServerEvents {
     songResume: () => void;
     songAddToQueue: (songId: string) => void;
     updateRoomOptions: (options: RoomOptions) => void;
+    roomDestroy: () => void;
 }
 
 export interface InterServerEvents {

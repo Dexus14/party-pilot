@@ -269,6 +269,10 @@ export function destroyRoomByOwnerId(ownerSpotifyId: string) {
     roomsCache.del(roomId)
 }
 
+export function destroyRoom(roomId: string) {
+    roomsCache.del(roomId)
+}
+
 export function getRoomOwnersRoomId(ownerSpotifyId: string) {
     return roomOwnersCache.get(ownerSpotifyId) as string|undefined
 }

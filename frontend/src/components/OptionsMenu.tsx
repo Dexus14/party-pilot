@@ -1,11 +1,20 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Socket} from "socket.io-client";
 import {Button, Col, Container, FloatingLabel, Form, ListGroup, Row} from "react-bootstrap";
 
 
-export default function OptionsMenu({ socket, room, optionsStateUpdate }: { socket: Socket, room: any, optionsStateUpdate: any }) {
+export default function OptionsMenu({ socket, room, optionsStateUpdate, destroyRoom }: { socket: Socket, room: any, optionsStateUpdate: any, destroyRoom: any }) {
     const [roomName, setRoomName] = useState(room.options.name)
     const [songsPerUser, setSongsPerUser] = useState(room.options.songsPerUser)
+    const [destroySurePrompt, setDestroySurePrompt] = useState(false)
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setDestroySurePrompt(false)
+        }, 3000)
+
+        return () => clearTimeout(timeout)
+    }, [destroySurePrompt])
 
     async function saveOptions() {
         const options ={
@@ -45,6 +54,15 @@ export default function OptionsMenu({ socket, room, optionsStateUpdate }: { sock
                             >
                                 <Form.Control type="number" placeholder="Songs per user" defaultValue={songsPerUser} onChange={(e) => setSongsPerUser(e.target.value)} />
                             </FloatingLabel>
+
+                            {
+                                !destroySurePrompt ?
+                                    <Button variant="danger" onClick={() => setDestroySurePrompt(true)}>Destroy</Button> :
+                                    <Button variant="danger" onClick={() => {
+                                        destroyRoom()
+                                        optionsStateUpdate(false)
+                                    }}>Are you sure?</Button>
+                            }
 
                             <div className={"d-flex justify-content-start mt-4"}>
                                 <Button className={"me-2"} variant={'primary'} onClick={saveOptions}>Save</Button>

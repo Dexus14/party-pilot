@@ -1,6 +1,6 @@
 import {Server, Socket} from "socket.io";
 import {
-    canUserAddSong,
+    canUserAddSong, destroyRoom,
     getQueueWithRoomUsers,
     getRoomUser,
     roomUserAddSong,
@@ -50,6 +50,7 @@ export function createWebsocketListeners(io: Server<
         socket.on('songResume', () => eventSongResume(socket, roomId))
         socket.on('songAddToQueue', (songUri) => eventSongAddToQueue(socket, roomId, userRoomId, songUri))
         socket.on('updateRoomOptions', (options) => eventUpdateRoomOptions(socket, roomId, userRoomId, options))
+        socket.on('roomDestroy', () => eventRoomDestroy(socket, roomId, userRoomId))
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })
@@ -134,6 +135,26 @@ async function eventUpdateRoomOptions(socket: Socket, roomId: string, userRoomId
 }
 
 async function eventDisconnect(socket: Socket, roomId: string, userRoomId: string) {
-    setRoomUserActive(roomId, userRoomId, false)
-    await socketRoomUpdate(socket, roomId)
+    try {
+        setRoomUserActive(roomId, userRoomId, false)
+        await socketRoomUpdate(socket, roomId)
+    } catch(e) {
+        handleSocketError(socket, e, false)
+    }
+}
+
+async function eventRoomDestroy(socket: Socket, roomId: string, userRoomId: string) {
+    try {
+        const roomUser = getRoomUser(roomId, userRoomId)
+
+        if(!roomUser.isOwner) {
+            return handleSocketError(socket, new Error('Only the owner can change destroy the room.'), false)
+        }
+
+        destroyRoom(roomId)
+        socket.emit('roomDestroyed')
+        socket.to(roomId).emit('roomDestroyed')
+    } catch(e) {
+        handleSocketError(socket, e, false)
+    }
 }
