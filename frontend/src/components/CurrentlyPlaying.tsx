@@ -19,7 +19,10 @@ export default function CurrentlyPlaying({ track }: { track: any }) {
 
         if(track.is_playing) {
             const interval = setInterval(() => {
-                setAssumedProgress((last) => last + 1000)
+                setAssumedProgress((last) => {
+                    if(last + 1000 >= track.duration_ms) return last
+                    return last + 1000
+                })
             }, 1000)
 
             return () => {
@@ -35,8 +38,8 @@ export default function CurrentlyPlaying({ track }: { track: any }) {
                 <div style={{minWidth: '40%', maxWidth: '50%'}} className={"d-flex flex-column align-items-end justify-content-between"}>
                     <div className={"d-flex flex-column align-items-end"}>
                         <h3 className={"m-0 text-end"}>{ track.name }</h3>
-                        <p className={"m-0"}>{ artistsString }</p>
-                        <p className={"m-0"} style={{fontSize: '0.65rem'}}>{ track.album.name }</p>
+                        <p className={"m-0 text-end"}>{ artistsString }</p>
+                        <p className={"m-0 text-end"} style={{fontSize: '0.65rem'}}>{ track.album.name }</p>
                     </div>
 
                     <div style={{width: '100%'}} className={"text-end"}>
