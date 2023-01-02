@@ -25,7 +25,7 @@ function getAddedByAvatars(track: any) {
         })
     }
 
-    return <><img className={window.innerWidth < 576 ? "avatar-xs" : "avatar-sm"} src="./spotify-icon.png" alt="spotify icon"/></>
+    return <><i style={{ fontSize: window.innerWidth < 576 ? '30px' : '40px' }} className={"bi bi-question-circle"}></i></>
 }
 
 export default function SongQueue({ queue }: { queue: any[] }) {
