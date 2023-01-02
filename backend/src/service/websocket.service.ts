@@ -36,6 +36,7 @@ export function createWebsocketListeners(io: Server<
             await updateRoomQueue(roomId, socket)
         } catch(e) {
             if(e instanceof Error) {
+                console.log(e.message)
                 handleSocketError(socket, e, false)
             } else {
                 throw new Error('socketConnection: Unknown error')
@@ -61,7 +62,7 @@ async function eventSongPrevious(socket: Socket, roomId: string) {
         await previousSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
@@ -72,7 +73,7 @@ async function eventSongNext(socket: Socket, roomId: string) {
         await nextSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
@@ -83,7 +84,7 @@ async function eventSongPause(socket: Socket, roomId: string) {
         await pauseSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
@@ -94,7 +95,7 @@ async function eventSongResume(socket: Socket, roomId: string) {
         await resumeSong(accessToken)
         await updateRoomTrack(roomId, socket)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
@@ -113,7 +114,7 @@ async function eventSongAddToQueue(socket: Socket, roomId: string, userRoomId: s
         socket.emit('roomQueueUpdate', queueWithUserData)
         socket.to(roomId).emit('roomQueueUpdate', queueWithUserData)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
@@ -128,7 +129,7 @@ async function eventUpdateRoomOptions(socket: Socket, roomId: string, userRoomId
         await updateRoomOptions(roomId, options)
         await socketRoomUpdate(socket, roomId, true)
     } catch(e) {
-        handleSocketError(socket, e, true)
+        handleSocketError(socket, e, false)
     }
 }
 
