@@ -1,39 +1,33 @@
 import {Overlay, Placeholder, Tooltip} from "react-bootstrap";
 import React, {useEffect, useRef, useState} from "react";
 
-const APP_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_APP_URL as string : process.env.RENDER_EXTERNAL_URL as string
-
 export function RoomId({ room }: { room: any }) {
     const [copyingState, setCopyingState] = useState<string|null>(null)
     const target = useRef(null)
 
     async function copyRoomId() {
-        setCopyingState('copying')
         if(!navigator.clipboard) {
             return setCopyingState('failed')
         }
-        const joinLink = APP_URL + '/room/join'
+        const joinLink = window.location.origin + '/room/join'
         await navigator.clipboard.writeText(joinLink)
         setCopyingState('success')
     }
     useEffect(() => {
         if (copyingState) {
-            setTimeout(() => setCopyingState(null), 3000)
+            const timeout = setTimeout(() => setCopyingState(null), 3000)
+            return () => {
+                window.clearTimeout(timeout)
+            }
         }
     }, [copyingState])
 
     function renderButton() {
         switch(copyingState) {
-            case 'copying':
-                return (
-                    <button ref={target} className={'btn btn-outline-secondary btn-sm ms-2'}>
-                        <i className="bi bi-clipboard-pulse"></i>
-                    </button>
-                )
             case 'success':
                 return (
-                    <button ref={target} className={'btn btn-outline-secondary btn-sm ms-2'}>
-                        <i className="bi bi-clipboard-plus"></i>
+                    <button ref={target} className={'btn btn-outline-success btn-sm ms-2'}>
+                        <i className="bi bi-clipboard-check"></i>
                     </button>
                 )
             case 'failed':
