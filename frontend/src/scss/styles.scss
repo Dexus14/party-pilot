@@ -57,22 +57,34 @@ body {
 .player-button {
   height: 70%;
   aspect-ratio: 1 / 1;
-  background-color: black;
-  color: white;
+  color: white !important;
   margin: 10px;
 
-  border: none;
   border-radius: 50%;
+  border: 2px solid white;
 
   font-size: 2rem;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background-color: transparent !important;
+  position: relative;
+  overflow: hidden;
+  font-weight: bold;
 }
 
-@media (prefers-color-scheme: dark) {
-
+.player-button:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background-color: white;
+  transition: all 0.7s;
+  z-index: -1;
 }
 
 .searching {
@@ -95,4 +107,20 @@ body {
   min-width: 10vh;
   max-width: 10vw;
   border-radius: 5px;
+}
+
+.holding:hover:before {
+  width: 100%;
+}
+
+@keyframes holding-animation {
+    0% {
+      transform: rotate(0deg);
+    }
+    80% {
+      transform: rotate(400deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
 }
