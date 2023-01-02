@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import MusicPlayerButton from "./MusicPlayerButton";
 
 export default function MusicPlayer({
     currentTrack,
@@ -23,18 +22,18 @@ export default function MusicPlayer({
 
     return (
         <div className={"music-player"}>
-            <MusicPlayerButton icon={<i className="bi bi-skip-start-fill"></i>} action={previousAction} />
+            <button className={"player-button"} onClick={previousAction}><i className="bi bi-skip-start-fill"></i></button>
             { isPlaying ?
-                <MusicPlayerButton icon={<i className="bi bi-pause-fill"></i>} action={() => {
+                <button className={"player-button"} onClick={()=> {
                     setIsPlaying(false)
                     pauseAction()
-                }} /> :
-                <MusicPlayerButton icon={<i className="bi bi-play-fill"></i>} action={() => {
+                }}><i className="bi bi-pause-fill"></i></button> :
+                <button className={"player-button"} onClick={() => {
                     setIsPlaying(true)
                     resumeAction()
-                }} />
+                }}><i className="bi bi-play-fill"></i></button>
             }
-            <MusicPlayerButton icon={<i className="bi bi-skip-end-fill"></i>} action={nextAction} />
+            <button className={"player-button"} onClick={nextAction}><i className="bi bi-skip-end-fill"></i></button>
         </div>
     )
 }

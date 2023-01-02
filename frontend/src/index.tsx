@@ -24,9 +24,11 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <ThemeSelector>
-      <App />
-  </ThemeSelector>
+  <React.StrictMode>
+      <ThemeSelector>
+          <App />
+      </ThemeSelector>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
