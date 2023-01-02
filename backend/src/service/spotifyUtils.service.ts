@@ -29,9 +29,8 @@ export async function refreshTokenIfNeeded(room: Room) {
     if(diff > tokenLifetime) {
         const result = await refreshToken(room.refreshToken)
         const newAccessToken = result.access_token
-        const newRefreshToken = result.refresh_token
 
-        const updatedRoom = updateRoomTokens(room.id, newAccessToken, newRefreshToken)
+        const updatedRoom = updateRoomTokens(room.id, newAccessToken)
 
         return updatedRoom.accessToken
     }

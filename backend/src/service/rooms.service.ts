@@ -281,14 +281,13 @@ export function roomOwnerExists(ownerSpotifyId: string) {
     return roomOwnersCache.has(ownerSpotifyId)
 }
 
-export function updateRoomTokens(roomId: string, accessToken: string, refreshToken: string) {
+export function updateRoomTokens(roomId: string, accessToken: string) {
     const room = getRoom(roomId)
     if(!room) {
         throw new Error('Room does not exist')
     }
 
     room.accessToken = accessToken
-    room.refreshToken = refreshToken
     room.lastRefresh = Date.now()
     setRoom(room)
     return room
