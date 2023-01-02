@@ -1,3 +1,6 @@
+import express from "express";
+import {APP_URL, SPOTIFY_AUTH_REDIRECT_URL} from "../index";
+
 export function randomString(length: number) {
     let result = '';
     const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -41,4 +44,18 @@ export function getMainErrorMessage(error: string) {
         default:
             return 'Unknown error'
     }
+}
+
+export function getAppUrl(req: express.Request|null = null) {
+    if(req && !(process.env.APP_ENV === 'dev')) {
+        return req.protocol + '://' + req.get('host') + '/app';
+    }
+    return APP_URL
+}
+
+export function getRoomCreateLink(req: express.Request) {
+    if(req) {
+        return req.protocol + '://' + req.get('host') + '/room/create'
+    }
+    return SPOTIFY_AUTH_REDIRECT_URL
 }

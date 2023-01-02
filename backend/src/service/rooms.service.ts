@@ -303,7 +303,7 @@ function generateRoomId() {
 function removeRoomIfExpired(roomId: string) {
     const room = getRoom(roomId)
     if(!room) {
-        throw new Error('Room does not exist')
+        return
     }
 
     if(room.createdAt + ROOM_LIFETIME < Date.now()) {
