@@ -14,6 +14,7 @@ import OptionsMenu from "./components/OptionsMenu";
 import {RoomId} from "./components/RoomId";
 import RoomDestroyed from "./components/RoomDestroyed";
 import {RoomQr} from "./components/RoomQr";
+import useLanguage from "./hooks/useLanguage";
 
 const WEBSOCKET_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_WEBSOCKET_URL : window.location.protocol + '//' + window.location.host
 
@@ -33,6 +34,8 @@ function App() {
     const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('TYPE_OF_THEME') || 'dark')
     const [roomDestroyed, setRoomDestroyed] = useState(false)
     const [inQrView, setInQrView] = useState(false)
+
+    const { content } = useLanguage()
 
     function removeError(index: number) {
         setErrors(errors => errors.filter((_, i) => i !== index))
@@ -112,10 +115,10 @@ function App() {
                         <Form.Control
                             id="search-song-input"
                             type="text"
-                            placeholder="Search song"
+                            placeholder={ content.searchSong }
                             onFocus={() => setIsSearching(true)}
                         />
-                        <label htmlFor="search-song-input">Search song</label>
+                        <label htmlFor="search-song-input">{ content.searchSong }</label>
                     </Form.Floating>
                 </Col>
             </Row>
@@ -131,12 +134,12 @@ function App() {
 
                     <div className={'d-flex justify-content-center align-items-center'}>
                         <Button className={'me-5'} variant={"primary"} onClick={() => setInOptions(true)}>
-                            Options
+                            { content.options }
                         </Button>
                         <Form.Check
                             type="switch"
                             id="theme-switch"
-                            label="Dark theme"
+                            label={ content.darkTheme }
                             checked={selectedTheme === 'dark'}
                             onChange={(e) => {
                                 setSelectedTheme(e.target.checked ? 'dark' : 'light')
@@ -169,7 +172,7 @@ function App() {
                         xl={{span:6, offset: 3}}
                     >
                         <div className="d-flex justify-content-center align-items-center pt-5">
-                            <h4 className={'mb-0 me-4'}>Waiting for the owner to launch Spotify</h4>
+                            <h4 className={'mb-0 me-4'}>{ content.waitingForLaunch }</h4>
                             <Spinner animation={'border'} role={'status'} />
                         </div>
                     </Col>

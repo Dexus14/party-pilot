@@ -1,0 +1,22 @@
+{
+  "searchSong": "Search song",
+  "options": "Options",
+  "waitingForLaunch": "Waiting for the owner to launch Spotify",
+  "roomDestroyed": "Sorry, but the owner of this room has closed it.",
+  "goToHomepage": "Go to homepage",
+  "roomNotExists": "Sorry, but it seems this room either does not exist or you are not authorized to join it.",
+  "qrTitle": "Room join QR",
+  "close": "Close",
+  "save": "Save",
+  "roomNameLabel": "Room name",
+  "songsPerUserLabel": "Songs per user",
+  "destroyRoom": "Destroy room",
+  "destroyRoomConfirmation": "Are you sure?",
+  "username": "Username",
+  "avatar": "Avatar",
+  "you": "you",
+  "roomCode": "Room code",
+  "roomCodeCopySuccess": "Copied!",
+  "roomCodeCopyFail": "Sorry, copying is unavailable right now.",
+  "darkTheme": "Dark theme"
+}
