@@ -36,6 +36,7 @@ app.use(cookieParser())
 app.use(express.urlencoded({
     extended: true
 }))
+app.enable('trust proxy') // Required for correct protocol in link generation
 // Logging middleware
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
