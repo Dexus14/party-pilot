@@ -3,13 +3,19 @@
 <div class="col-xs-12 col-md-10 offset-md-1 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4"
      style="height: 100%;"
 >
-    <h1 style="position: fixed; left: 0; top: 15vh; font-size: 3rem; text-align: center; width: 100%">Party pilot <i class="bi bi-speaker"></i></h1>
+    <h1 style="position: fixed; left: 0; top: 7.5vh; font-size: 3rem; text-align: center; width: 100%">Party pilot <i class="bi bi-speaker"></i></h1>
 
     <div style="height: 100%;" class="d-flex flex-column align-items-center justify-content-center">
         <% if (error !== '') { %>
         <div style="width: 80%;" class="alert alert-danger" role="alert">
             <%= error %>
         </div>
+        <% } %>
+
+        <% if (isFacebookBrowser) { %>
+            <div style="width: 80%;" class="alert alert-warning" role="alert">
+                It looks like you're using the Facebook browser. It is recommended to use a different browser for the best experience in order to not lose your session.
+            </div>
         <% } %>
 
         <form style="width: 80%" method="post">

@@ -10,7 +10,12 @@ import {
 import express from "express";
 import {getSpotifyAuthLink} from "../service/spotifyUtils.service";
 import {encodeAuthData, verifyJwtRoomUser} from "../service/auth.service";
-import {getAppUrl, getRoomCreateLink, getRoomJoinErorrMessage} from "../service/utils.service";
+import {
+    checkIsFacebookBrowser,
+    getAppUrl,
+    getRoomCreateLink,
+    getRoomJoinErorrMessage
+} from "../service/utils.service";
 
 export async function roomCreateGet(req: express.Request, res: express.Response) {
     try {
@@ -49,13 +54,15 @@ export async function roomAuthGet(req: express.Request, res: express.Response) {
 }
 
 export async function roomJoinGet(req: express.Request, res: express.Response) {
+    const isFacebookBrowser = checkIsFacebookBrowser(req.headers['user-agent'] ?? '')
+
     const roomId = req?.params?.roomId ?? ''
     let error = req?.query?.error ?? ''
     if(error !== ''  && typeof error === 'string') {
         error = getRoomJoinErorrMessage(error)
     }
 
-    res.render('roomJoin', { roomId, error })
+    res.render('roomJoin', { roomId, error, isFacebookBrowser })
 }
 
 export async function roomJoinPost(req: express.Request, res: express.Response) {

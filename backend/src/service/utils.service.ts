@@ -59,3 +59,7 @@ export function getRoomCreateLink(req: express.Request) {
     }
     return SPOTIFY_AUTH_REDIRECT_URL
 }
+
+export function checkIsFacebookBrowser(userAgent: string) {
+    return userAgent.includes('FBAN') || userAgent.includes('FBAV')
+}
