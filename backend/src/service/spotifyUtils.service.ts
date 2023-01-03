@@ -4,13 +4,15 @@ import {randomString} from "./utils.service";
 import {updateRoomTokens} from "./rooms.service";
 import {SPOTIFY_AUTH_REDIRECT_URL, SPOTIFY_DESTROY_REDIRECT_URL} from "../index";
 
-export function getSpotifyAuthLink(redirectToDestroy: boolean = false) {
+export function getSpotifyAuthLink(redirectToDestroy: boolean = false, redirectUrl: string|null = null) {
+    const authRedirect = redirectUrl ?? SPOTIFY_AUTH_REDIRECT_URL
+
     return SPOTIFY_AUTH_API_URL + '?' +
         querystring.stringify({
             response_type: 'code',
             client_id: process.env.SPOTIFY_CLIENT_ID,
             scope: SPOTFIY_SCOPES,
-            redirect_uri: redirectToDestroy ? SPOTIFY_DESTROY_REDIRECT_URL : SPOTIFY_AUTH_REDIRECT_URL,
+            redirect_uri: redirectToDestroy ? SPOTIFY_DESTROY_REDIRECT_URL : authRedirect,
             state: randomString(16) // FIXME: How to use this state properly?
         })
 }
@@ -27,9 +29,8 @@ export async function refreshTokenIfNeeded(room: Room) {
     if(diff > tokenLifetime) {
         const result = await refreshToken(room.refreshToken)
         const newAccessToken = result.access_token
-        const newRefreshToken = result.refresh_token
 
-        const updatedRoom = updateRoomTokens(room.id, newAccessToken, newRefreshToken)
+        const updatedRoom = updateRoomTokens(room.id, newAccessToken)
 
         return updatedRoom.accessToken
     }

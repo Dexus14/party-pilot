@@ -8,7 +8,7 @@ import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDat
 import {createWebsocketListeners} from "./service/websocket.service";
 import {updateRoomTracksIntervally} from "./service/rooms.service";
 import spotifyRoutes from "./routes/spotify.routes";
-import {getMainErrorMessage, getMainSuccessMessage} from "./service/utils.service";
+import {getAppUrl, getMainErrorMessage, getMainSuccessMessage} from "./service/utils.service";
 require('dotenv').config()
 
 export const APP_URL = process.env.APP_ENV === 'dev' ? process.env.APP_DEV_URL as string : process.env.RENDER_EXTERNAL_URL + '/app' as string
@@ -66,7 +66,7 @@ app.use(express.static(path.join(__dirname, '../src/views/public')))
 
 app.get('/app', async (req, res) => {
     process.env.APP_ENV === 'dev' ?
-        res.redirect(APP_URL ?? '') :
+        res.redirect(getAppUrl(req)) :
         res.sendFile(path.join(__dirname, '../../frontend/build/index.html'))
 })
 
@@ -85,7 +85,7 @@ export const io = new Server<
     SocketData
     >(server, {
     cors: {
-        origin: [APP_URL],
+        origin: [getAppUrl()],
         credentials: true
     },
     cookie: true

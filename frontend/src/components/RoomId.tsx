@@ -1,7 +1,7 @@
 import {Overlay, Placeholder, Tooltip} from "react-bootstrap";
 import React, {useEffect, useRef, useState} from "react";
 
-export function RoomId({ room }: { room: any }) {
+export function RoomId({ room, qrViewUpdate }: { room: any, qrViewUpdate: any }) {
     const [copyingState, setCopyingState] = useState<string|null>(null)
     const target = useRef(null)
 
@@ -9,7 +9,7 @@ export function RoomId({ room }: { room: any }) {
         if(!navigator.clipboard) {
             return setCopyingState('failed')
         }
-        const joinLink = window.location.origin + '/room/join'
+        const joinLink = window.location.origin + '/room/join/' + room.id
         await navigator.clipboard.writeText(joinLink)
         setCopyingState('success')
     }
@@ -52,6 +52,10 @@ export function RoomId({ room }: { room: any }) {
             </p>
 
             {renderButton()}
+
+            <button onClick={() => qrViewUpdate(true)} className={'btn btn-outline-secondary btn-sm ms-2'}>
+                <i className="bi bi-qr-code"></i>
+            </button>
 
             <Overlay target={target.current} show={copyingState !== null} placement="right">
                 {(props) => (

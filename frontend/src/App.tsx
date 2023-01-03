@@ -12,6 +12,8 @@ import {Button, Col, Container, Form, Placeholder, Row, Spinner} from "react-boo
 import ErrorToasts from "./components/ErrorToasts";
 import OptionsMenu from "./components/OptionsMenu";
 import {RoomId} from "./components/RoomId";
+import RoomDestroyed from "./components/RoomDestroyed";
+import {RoomQr} from "./components/RoomQr";
 
 const WEBSOCKET_URL = process.env.REACT_APP_ENV === 'dev' ? process.env.REACT_APP_WEBSOCKET_URL : window.location.protocol + '//' + window.location.host
 
@@ -29,6 +31,8 @@ function App() {
     const [currentTrack, setCurrentTrack] = useState<any | null>(null)
     const [errors, setErrors] = useState<string[]>([])
     const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('TYPE_OF_THEME') || 'dark')
+    const [roomDestroyed, setRoomDestroyed] = useState(false)
+    const [inQrView, setInQrView] = useState(false)
 
     function removeError(index: number) {
         setErrors(errors => errors.filter((_, i) => i !== index))
@@ -45,6 +49,8 @@ function App() {
 
         socket.on('overSongLimit', () => setErrors(last => [...last, 'You have reached the song limit for this room.']))
 
+        socket.on('roomDestroyed', () => setRoomDestroyed(true))
+
         socket.on('error', (error) => setErrors(last => [...last, error]))
 
         return () => {
@@ -53,12 +59,21 @@ function App() {
             socket.off('trackUpdate')
             socket.off('roomQueueUpdate')
             socket.off('overSongLimit')
+            socket.off('roomDestroyed')
             socket.off('error')
         }
     }, [])
 
+    if(roomDestroyed) {
+        return <RoomDestroyed />
+    }
+
     if(!isAuthorized) {
         return <Unauthorized />
+    }
+
+    if(inQrView) {
+        return <RoomQr room={room} qrViewUpdate={setInQrView} />
     }
 
     if(isSearching) {
@@ -66,7 +81,7 @@ function App() {
     }
 
     if(inOptions) {
-        return (<OptionsMenu socket={socket} room={room} optionsStateUpdate={setInOptions} />)
+        return (<OptionsMenu socket={socket} room={room} optionsStateUpdate={setInOptions} destroyRoom={() => socket.emit('roomDestroy')} />)
     }
 
     return (
@@ -112,7 +127,7 @@ function App() {
                     lg={{span:8, offset: 2}}
                     xl={{span:6, offset: 3}}
                 >
-                    <RoomId room={room} />
+                    <RoomId room={room} qrViewUpdate={setInQrView} />
 
                     <div className={'d-flex justify-content-center align-items-center'}>
                         <Button className={'me-5'} variant={"primary"} onClick={() => setInOptions(true)}>
