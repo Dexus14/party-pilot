@@ -1,4 +1,5 @@
 import {Placeholder, Spinner, Table} from "react-bootstrap";
+import useLanguage from "../hooks/useLanguage";
 
 function generatePlaceholder() {
     return [...Array(3)].map((_: any, key: number) => {
@@ -19,13 +20,15 @@ function generatePlaceholder() {
 }
 
 export default function RoomUsers({ room, currentUsername }: { room: any, currentUsername: string }) {
+    const { content } = useLanguage()
+
     return (
         <Table striped bordered hover>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Username</th>
-                    <th>Avatar</th>
+                    <th>{ content.username }</th>
+                    <th>{ content.avatar }</th>
                 </tr>
             </thead>
             <tbody>

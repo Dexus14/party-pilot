@@ -1,9 +1,12 @@
 import {Overlay, Placeholder, Tooltip} from "react-bootstrap";
 import React, {useEffect, useRef, useState} from "react";
+import useLanguage from "../hooks/useLanguage";
 
 export function RoomId({ room, qrViewUpdate }: { room: any, qrViewUpdate: any }) {
     const [copyingState, setCopyingState] = useState<string|null>(null)
     const target = useRef(null)
+
+    const { content } = useLanguage()
 
     async function copyRoomId() {
         if(!navigator.clipboard) {
@@ -48,7 +51,7 @@ export function RoomId({ room, qrViewUpdate }: { room: any, qrViewUpdate: any })
     return (
         <div className={'d-flex justify-content-center align-items-center mb-3'}>
             <p style={{ cursor: 'pointer' }} onClick={copyRoomId} className={"room-code m-0"}>
-                Room code: {room?.id ?? <Placeholder animation={'glow'}><Placeholder xs={1} size={'xs'} /></Placeholder>}
+                { content.roomCode }: {room?.id ?? <Placeholder animation={'glow'}><Placeholder xs={1} size={'xs'} /></Placeholder>}
             </p>
 
             {renderButton()}
@@ -60,7 +63,7 @@ export function RoomId({ room, qrViewUpdate }: { room: any, qrViewUpdate: any })
             <Overlay target={target.current} show={copyingState !== null} placement="right">
                 {(props) => (
                     <Tooltip id="overlay" {...props}>
-                        {copyingState === 'success' ? 'Join link saved to clipboard!' : 'Sorry, copying is unavailable right now.'}
+                        {copyingState === 'success' ? content.roomCodeCopySuccess : content.roomCodeCopyFail }
                     </Tooltip>
                 )}
             </Overlay>

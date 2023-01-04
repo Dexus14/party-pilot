@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {Socket} from "socket.io-client";
 import {Col, Container, Form, ListGroup, Placeholder, Row} from "react-bootstrap";
+import useLanguage from "../hooks/useLanguage";
 
 function getSongTimeFromMillis(millis: number) {
     const minutes = Math.floor(millis / 60000);
@@ -14,6 +15,7 @@ export default function SongSearch({ socket, searchingStateUpdate }: { socket: S
     const [results, setResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [placeholderList, setPlaceholderList] = useState<any[]>([]);
+    const { content } = useLanguage()
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -66,13 +68,13 @@ export default function SongSearch({ socket, searchingStateUpdate }: { socket: S
                         <Form.Control
                             id="search-song-input"
                             type="text"
-                            placeholder="Search song"
+                            placeholder={ content.searchSong }
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             autoFocus
                             onBlur={() => setTimeout(() => searchingStateUpdate(false), 200)}
                         />
-                        <label htmlFor="search-song-input">Search song</label>
+                        <label htmlFor="search-song-input">{ content.searchSong }</label>
                     </Form.Floating>
                 </Col>
             </Row>

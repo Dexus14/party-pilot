@@ -1,7 +1,10 @@
 import React from "react";
 import {Col, Container, Row} from "react-bootstrap";
+import useLanguage from "../hooks/useLanguage";
 
 export default function Unauthorized() {
+    const { content } = useLanguage()
+
     return (
         <Container id={"app"}>
             <Row className={"mt-3"}>
@@ -13,7 +16,7 @@ export default function Unauthorized() {
                 >
                     <div className={'d-flex flex-column align-items-center justify-content-center mt-5'}>
                         <h1 className={"room-name"}>
-                            Sorry, but it seems this room either does not exist or you are not authorized to join it.
+                            { content.roomNotExists }
                         </h1>
 
                         <i style={{
@@ -21,7 +24,7 @@ export default function Unauthorized() {
                         }} className="bi bi-emoji-frown"></i>
 
                         <a href={window.location.origin}>
-                            <button className={'btn btn-lg btn-primary'}>Go to homepage</button>
+                            <button className={'btn btn-lg btn-primary'}>{ content.goToHomepage }</button>
                         </a>
                     </div>
                 </Col>

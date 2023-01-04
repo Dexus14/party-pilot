@@ -6,8 +6,11 @@ import {
     Row,
 } from "react-bootstrap";
 import QRCode from "react-qr-code";
+import useLanguage from "../hooks/useLanguage";
 
 export function RoomQr({ room, qrViewUpdate }: { room: any, qrViewUpdate: any }) {
+    const { content } = useLanguage()
+
     const joinLink = window.location.origin + '/room/join/' + room.id
 
     return (
@@ -21,7 +24,7 @@ export function RoomQr({ room, qrViewUpdate }: { room: any, qrViewUpdate: any })
                 >
                     <ListGroup>
                         <ListGroup.Item className={"d-flex flex-column p-lg-4 p-sm-3"}>
-                            <h1 className={'mb-4'}>Room join QR</h1>
+                            <h1 className={'mb-4'}>{ content.qrTitle }</h1>
 
                             <div className={'qr-wrapper align-self-center mb-4'}>
                                 <QRCode
@@ -35,7 +38,7 @@ export function RoomQr({ room, qrViewUpdate }: { room: any, qrViewUpdate: any })
 
 
                             <div className={"d-flex justify-content-start mt-4"}>
-                                <Button variant="primary" onClick={() => qrViewUpdate(false)}>Close</Button>
+                                <Button variant="primary" onClick={() => qrViewUpdate(false)}>{ content.close }</Button>
                             </div>
                         </ListGroup.Item>
                     </ListGroup>

@@ -127,7 +127,7 @@ async function eventUpdateRoomOptions(socket: Socket, roomId: string, userRoomId
             return handleSocketError(socket, new Error('Only the owner can change options.'), false)
         }
 
-        await updateRoomOptions(roomId, options)
+        updateRoomOptions(roomId, options)
         await socketRoomUpdate(socket, roomId, true)
     } catch(e) {
         handleSocketError(socket, e, false)

@@ -1,0 +1,22 @@
+{
+  "searchSong": "Wyszukaj utwór",
+  "options": "Ustawienia",
+  "waitingForLaunch": "Czekam, aż właściciel pokoju uruchomi Spotify.",
+  "roomDestroyed": "Właściciel zamknął ten pokój.",
+  "goToHomepage": "Powrót do strony głównej",
+  "roomNotExists": "Ten pokój nie istnieje lub nie masz uprawnień aby do niego dołączyć.",
+  "qrTitle": "Zeskanuj ten kod QR aby dołączyć do pokoju.",
+  "close": "Zamknij",
+  "save": "Zapisz",
+  "roomNameLabel": "Nazwa pokoju",
+  "songsPerUserLabel": "Ilość utworów na osobę",
+  "destroyRoom": "Zamknij pokój",
+  "destroyRoomConfirmation": "Czy na pewno chcesz zamknąć pokój?",
+  "username": "Nazwa użytkownika",
+  "avatar": "Awatar",
+  "you": "ty",
+  "roomCode": "Kod pokoju",
+  "roomCodeCopySuccess": "Skopiowano!",
+  "roomCodeCopyFail": "Przepraszam, ale ta funkcja jest obecnie niedostępna.",
+  "darkTheme": "Ciemny motyw"
+}
