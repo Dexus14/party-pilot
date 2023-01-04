@@ -16,6 +16,7 @@ export interface ClientToServerEvents {
     songAddToQueue: (songId: string) => void;
     updateRoomOptions: (options: RoomOptions) => void;
     roomDestroy: () => void;
+    activeUpdate: (active: boolean) => void;
 }
 
 export interface InterServerEvents {

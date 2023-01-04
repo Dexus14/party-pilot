@@ -42,6 +42,22 @@ function App() {
     }
 
     useEffect(() => {
+        function onfocus() {
+            socket.emit('activeUpdate', true)
+        }
+        function onblur() {
+            socket.emit('activeUpdate', false)
+        }
+        window.addEventListener("focus", onfocus)
+        window.addEventListener("blur", onblur);
+
+        return () => {
+            window.removeEventListener("focus", onfocus);
+            window.removeEventListener("blur", onblur);
+        };
+    }, []);
+
+    useEffect(() => {
         socket.on('roomUpdate', (room) => setRoom(room))
 
         socket.on('connect_error', () => setIsAuthorized(false))
