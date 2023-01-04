@@ -1,8 +1,15 @@
 # Party pilot
 Party pilot is a simple web app that allows you to create Spotify queues from multiple devices that are played on only one.
 
-## How to use
+## About
+### How to use
 Simply press the "create room" button and allow access to required permissions. You will be redirected to a room page where you can add songs to the playlist. At this point make sure your Spotify is playing on any device or else you will be informed that the app can't add any songs. You can also share the link or QR code with your friends, so they can add songs to the playlist as well. Use the "options" button to be able to add a limit to added songs per each user, change the room name or delete the room.
+### Features
+- Add songs to room owner's from multiple devices
+- Control the playback of the room owner's device
+- Limit songs per user
+- Support for Polish and English language
+- QR code and invite copy link button for easy sharing
 
 ## How to run dev version
 ### Requirements
