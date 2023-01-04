@@ -51,6 +51,7 @@ export function createWebsocketListeners(io: Server<
         socket.on('songAddToQueue', (songUri) => eventSongAddToQueue(socket, roomId, userRoomId, songUri))
         socket.on('updateRoomOptions', (options) => eventUpdateRoomOptions(socket, roomId, userRoomId, options))
         socket.on('roomDestroy', () => eventRoomDestroy(socket, roomId, userRoomId))
+        socket.on('activeUpdate', (active) => eventUpdateActivity(socket, roomId, userRoomId, active))
 
         socket.on('disconnect', () => eventDisconnect(socket, roomId, userRoomId))
     })
@@ -154,6 +155,15 @@ async function eventRoomDestroy(socket: Socket, roomId: string, userRoomId: stri
         destroyRoom(roomId)
         socket.emit('roomDestroyed')
         socket.to(roomId).emit('roomDestroyed')
+    } catch(e) {
+        handleSocketError(socket, e, false)
+    }
+}
+
+async function eventUpdateActivity(socket: Socket, roomId: string, userRoomId: string, active: boolean) {
+    try {
+        setRoomUserActive(roomId, userRoomId, active)
+        await socketRoomUpdate(socket, roomId)
     } catch(e) {
         handleSocketError(socket, e, false)
     }

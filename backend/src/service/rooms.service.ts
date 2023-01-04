@@ -27,8 +27,11 @@ export function updateRoomTracksIntervally(io: Server) {
                 continue
             }
 
+            if(!anyActiveUsers(roomId)) {
+                continue
+            }
+
             try {
-                // TODO: Only query api when someone is active
                 await Promise.all([
                     updateRoomTrack(roomId, io),
                     updateRoomQueue(roomId, io),
@@ -295,6 +298,15 @@ export function updateRoomTokens(roomId: string, accessToken: string, refreshTok
     }
     setRoom(room)
     return room
+}
+
+export function anyActiveUsers(roomId: string) {
+    const room = getRoom(roomId)
+    if(!room) {
+        throw new Error('Room does not exist')
+    }
+
+    return room.users.some(user => user.currentlyActive)
 }
 
 function generateRoomId() {
