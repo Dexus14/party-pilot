@@ -1,3 +1,5 @@
+<img src="https://i.ibb.co/KN73jsM/cover.png" alt="cover" border="0">
+
 # Party pilot
 Party pilot is a simple web app that allows you to create Spotify queues from multiple devices that are played on only one.
 
